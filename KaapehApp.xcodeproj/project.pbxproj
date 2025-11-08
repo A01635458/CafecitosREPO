@@ -45,6 +45,11 @@
 			path = KaapehAppUITests;
 			sourceTree = "<group>";
 		};
+		A11C382E2EB2ABFF00536820 /* Screens */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Screens;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +84,7 @@
 				A11C38062EB2ABA300536820 /* KaapehAppTests */,
 				A11C38102EB2ABA300536820 /* KaapehAppUITests */,
 				A11C37F72EB2ABA100536820 /* Products */,
+				A11C382E2EB2ABFF00536820 /* Screens */,
 			);
 			sourceTree = "<group>";
 		};
@@ -109,6 +115,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A11C37F82EB2ABA100536820 /* KaapehApp */,
+				A11C382E2EB2ABFF00536820 /* Screens */,
 			);
 			name = KaapehApp;
 			packageProductDependencies = (
@@ -397,7 +404,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CWBAF94KUZ;
+				DEVELOPMENT_TEAM = JLJHA5D6V7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -410,7 +417,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.leobardo.KaapehApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.luisa.KaapehApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -429,7 +436,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CWBAF94KUZ;
+				DEVELOPMENT_TEAM = JLJHA5D6V7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -442,7 +449,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.leobardo.KaapehApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.luisa.KaapehApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

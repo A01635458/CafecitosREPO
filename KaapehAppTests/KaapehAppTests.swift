@@ -2,8 +2,6 @@
 //  KaapehAppTests.swift
 //  KaapehAppTests
 //
-//  Created by Leobardo Navarro Márquez on 29/10/25.
-//
 
 import Testing
 @testable import KaapehApp

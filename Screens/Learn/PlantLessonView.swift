@@ -1,32 +1,56 @@
-//
-//  PlantLessonView.swift
-//  KaapehApp
-//
-//  Created by Luisa Cardona on 07/11/25.
-//
-
-import Foundation
-
 import SwiftUI
 
 struct PlantLessonView: View {
+    @State private var showCamera = false
+    @State private var isFavorite = false
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Image("coffeeplant")
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                
-                Text("Iniciando con la planta")
-                    .font(.system(size: 24, weight: .bold))
-                Text("El cafeto es una planta tropical que crece en zonas de altura. Existen dos especies principales: **Coffea Arabica** y **Coffea Canephora (Robusta)**. La primera produce cafés más aromáticos y suaves, mientras que la segunda da sabores más fuertes y con mayor cafeína.")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 35) {
+                LessonHeaderView(
+                    imageURL: "https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg",
+                    title: "La planta del café",
+                    subtitle: "Origen, variedades y anatomía del cafeto",
+                    isFavorite: $isFavorite
+                )
+
+                LessonTextBlock(
+                    title: "Estructura del cafeto",
+                    text: """
+                    El cafeto es una planta perenne con hojas verdes brillantes y frutos llamados cerezas, que albergan los granos de café.
+
+                    Las variedades más comunes son Arábica y Robusta, con perfiles de sabor y resistencia distintos.
+                    """
+                )
+
+                LargeWidgetCard(
+                    imageURL: "https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg",
+                    title: "Crecimiento y floración",
+                    description: """
+                    Las flores del cafeto duran solo unos días, pero marcan el inicio del desarrollo de los frutos.
+
+                    La maduración puede tardar de 6 a 9 meses, dependiendo del clima y la altitud.
+                    """
+                )
+
+                FunFactGlassCard(text: "El café Arábica representa más del 60% de la producción mundial, aunque es más sensible al clima que la Robusta.")
+
+                QuizWidget(
+                    question: "¿Cuánto tarda en madurar un fruto del cafeto?",
+                    options: ["3 a 4 meses", "6 a 9 meses", "Más de 1 año"],
+                    correctAnswer: 1
+                )
+
+                LessonCameraSection(
+                    instruction: "Toma una foto de una planta de café o sus hojas para identificar su variedad.",
+                    showCamera: $showCamera
+                )
+
+                LessonFinishButton()
             }
-            .padding()
+            .padding(.bottom, 40)
         }
-        .navigationTitle("La Planta")
-        .background(Color.ka_bg)
+        .sheet(isPresented: $showCamera) { CameraScreen() }
+        .background(Color.ka_bg.ignoresSafeArea())
     }
 }
