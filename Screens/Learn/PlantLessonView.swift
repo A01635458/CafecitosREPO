@@ -27,7 +27,7 @@ struct PlantLessonView: View {
                     imageURL: "https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg",
                     title: "Crecimiento y floración",
                     description: """
-                    Las flores del cafeto duran solo unos días, pero marcan el inicio del desarrollo de los frutos.
+                    Las flores vfelnwrlivkklw  del cafeto duran solo unos días, pero marcan el inicio del desarrollo de los frutos.
 
                     La maduración puede tardar de 6 a 9 meses, dependiendo del clima y la altitud.
                     """
