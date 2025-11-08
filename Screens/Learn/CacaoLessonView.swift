@@ -1,3 +1,7 @@
+//leccion uno
+//clasificacion de defectos
+//tenga area para el quiz todo y lea de
+
 import SwiftUI
 
 struct CacaoLessonView: View {
