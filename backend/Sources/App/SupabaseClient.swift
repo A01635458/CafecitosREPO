@@ -12,6 +12,7 @@ struct SupabaseClient {
     }
     
     // MARK: - Generic Query
+    // Performs a GET request to fetch rows from a Supabase table.
     func query<T: Content>(
         table: String,
         select: String = "*",
@@ -47,6 +48,7 @@ struct SupabaseClient {
     }
     
     // MARK: - Insert
+    // Sends a POST request to insert a new row into a Supabase table.
     func insert<T: Content, R: Content>(table: String, data: T) async throws -> R {
         let uri = URI(string: "\(baseURL)/rest/v1/\(table)")
         
@@ -70,6 +72,7 @@ struct SupabaseClient {
     }
     
     // MARK: - Update
+    // Sends a PATCH request to update a row in a Supabase table by ID.
     func update<T: Content, R: Content>(table: String, id: String, data: T) async throws -> R {
         let uri = URI(string: "\(baseURL)/rest/v1/\(table)?id=eq.\(id)")
         
@@ -93,6 +96,7 @@ struct SupabaseClient {
     }
     
     // MARK: - Delete
+    // Sends a DELETE request to remove a row from a Supabase table by ID.
     func delete(table: String, id: String) async throws {
         let uri = URI(string: "\(baseURL)/rest/v1/\(table)?id=eq.\(id)")
         
