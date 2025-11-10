@@ -141,9 +141,11 @@ struct LearnView: View {
                     // MARK: - Encabezado
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Temario de lecciones")
-                            .font(.system(size: 30, weight: .bold))
+                            .font(.largeTitle.bold())
+                            .foregroundColor(Color.primary)
                         Text("Desde el cultivo hasta la taza")
-                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                         
                         // Botones de prueba API
                         HStack(spacing: 12) {
@@ -152,25 +154,27 @@ struct LearnView: View {
                                     await apiService.fetchModules()
                                 }
                             } label: {
-                                Label("GET Módulos", systemImage: "arrow.down.circle.fill")
+                                Label("Obtener Módulos", systemImage: "arrow.down.circle.fill")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 10)
                                     .background(Color.blue)
                                     .cornerRadius(10)
+                                    .shadow(radius: 3)
                             }
                             
                             Button {
                                 showCreateSheet = true
                             } label: {
-                                Label("POST Módulo", systemImage: "plus.circle.fill")
+                                Label("Publicar Módulo", systemImage: "plus.circle.fill")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 10)
                                     .background(Color.green)
                                     .cornerRadius(10)
+                                    .shadow(radius: 3)
                             }
                         }
                         .padding(.top, 8)
