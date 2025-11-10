@@ -1,0 +1,56 @@
+import XCTest
+
+final class CafecitosAppUITests: XCTestCase {
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+    }
+
+    override func tearDownWithError() throws {
+    }
+
+    @MainActor
+    func testModuleListDisplay() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let modulesTitle = app.staticTexts["Módulos Disponibles"]
+        XCTAssertTrue(modulesTitle.waitForExistence(timeout: 5), "La pantalla principal de módulos debe cargarse.")
+        
+        let firstModule = app.cells.element(boundBy: 0)
+        XCTAssertTrue(firstModule.exists, "Debe haber al menos un módulo listado.")
+        
+        let moduleTitle = firstModule.staticTexts.firstMatch
+        XCTAssertTrue(moduleTitle.exists, "El título del módulo debe estar visible.")
+    }
+
+    @MainActor
+    func testProgressUpdateFlow() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let firstModule = app.cells.element(boundBy: 0)
+        XCTAssertTrue(firstModule.waitForExistence(timeout: 5))
+        firstModule.tap()
+        
+        let lessonsTitle = app.staticTexts["Lecciones"]
+        XCTAssertTrue(lessonsTitle.waitForExistence(timeout: 3), "La pantalla de lecciones debe cargarse.")
+        
+        let firstLesson = app.cells.element(boundBy: 0)
+        XCTAssertTrue(firstLesson.exists, "Debe haber al menos una lección.")
+        firstLesson.tap() 
+        
+        let completeButton = app.buttons["Marcar como Completada"]
+        XCTAssertTrue(completeButton.waitForExistence(timeout: 5), "El botón de completar debe estar visible.")
+        
+        completeButton.tap()
+        
+        let completionConfirmation = app.alerts.firstMatch
+        XCTAssertTrue(completionConfirmation.waitForExistence(timeout: 2), "Se debe mostrar una alerta de confirmación de progreso.")
+        XCTAssertTrue(completionConfirmation.staticTexts["¡Lección Completada!"].exists)
+        completionConfirmation.buttons["Aceptar"].tap()
+        
+        let completedIndicator = app.staticTexts["Completado"]
+        XCTAssertTrue(completedIndicator.exists, "El estado de la lección debe cambiar a 'Completado'.")
+    }
+}
