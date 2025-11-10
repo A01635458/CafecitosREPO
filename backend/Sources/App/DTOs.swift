@@ -10,6 +10,22 @@ struct ModuleDTO: Content {
     let created_at: Date?
 }
 
+// MARK: - Create Module DTO
+struct CreateModuleDTO: Content {
+    let title: String
+    let description: String?
+    let sort_order: Int?
+    let is_active: Bool?
+}
+
+// MARK: - Update Module DTO
+struct UpdateModuleDTO: Content {
+    let title: String?
+    let description: String?
+    let sort_order: Int?
+    let is_active: Bool?
+}
+
 // MARK: - Lesson DTO
 struct LessonDTO: Content {
     let id: UUID
@@ -19,6 +35,23 @@ struct LessonDTO: Content {
     let sort_order: Int
     let is_active: Bool
     let created_at: Date?
+}
+
+// MARK: - Create Lesson DTO
+struct CreateLessonDTO: Content {
+    let module_id: UUID
+    let title: String
+    let content_url: String?
+    let sort_order: Int?
+    let is_active: Bool?
+}
+
+// MARK: - Update Lesson DTO
+struct UpdateLessonDTO: Content {
+    let title: String?
+    let content_url: String?
+    let sort_order: Int?
+    let is_active: Bool?
 }
 
 // MARK: - User DTO

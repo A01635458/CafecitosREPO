@@ -5,7 +5,10 @@ struct ModuleRestController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let modules = routes.grouped("api", "modules")
         modules.get(use: index)
+        modules.post(use: create)
         modules.get(":moduleId", use: show)
+        modules.put(":moduleId", use: update)
+        modules.delete(":moduleId", use: delete)
         modules.get(":moduleId", "lessons", use: getLessons)
     }
     
@@ -35,6 +38,49 @@ struct ModuleRestController: RouteCollection {
         return module
     }
     
+    func create(req: Request) async throws -> ModuleDTO {
+        let input = try req.content.decode(CreateModuleDTO.self)
+        req.logger.info("📚 Creating new module: \(input.title)")
+        
+        let module: ModuleDTO = try await req.supabase.insert(
+            table: "modules",
+            data: input
+        )
+        
+        return module
+    }
+    
+    func update(req: Request) async throws -> ModuleDTO {
+        guard let moduleId = req.parameters.get("moduleId") else {
+            throw Abort(.badRequest, reason: "Missing module ID")
+        }
+        
+        let input = try req.content.decode(UpdateModuleDTO.self)
+        req.logger.info("📚 Updating module \(moduleId)")
+        
+        let module: ModuleDTO = try await req.supabase.update(
+            table: "modules",
+            id: moduleId,
+            data: input
+        )
+        
+        return module
+    }
+    
+    func delete(req: Request) async throws -> HTTPStatus {
+        guard let moduleId = req.parameters.get("moduleId") else {
+            throw Abort(.badRequest, reason: "Missing module ID")
+        }
+        
+        req.logger.info("📚 Deleting module \(moduleId)")
+        try await req.supabase.delete(
+            table: "modules",
+            id: moduleId
+        )
+        
+        return .noContent
+    }
+    
     func getLessons(req: Request) async throws -> [LessonDTO] {
         guard let moduleId = req.parameters.get("moduleId") else {
             throw Abort(.badRequest, reason: "Missing module ID")
@@ -54,7 +100,10 @@ struct LessonRestController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let lessons = routes.grouped("api", "lessons")
         lessons.get(use: index)
+        lessons.post(use: create)
         lessons.get(":lessonId", use: show)
+        lessons.put(":lessonId", use: update)
+        lessons.delete(":lessonId", use: delete)
     }
     
     func index(req: Request) async throws -> [LessonDTO] {
@@ -81,6 +130,49 @@ struct LessonRestController: RouteCollection {
         }
         
         return lesson
+    }
+    
+    func create(req: Request) async throws -> LessonDTO {
+        let input = try req.content.decode(CreateLessonDTO.self)
+        req.logger.info("📖 Creating new lesson: \(input.title)")
+        
+        let lesson: LessonDTO = try await req.supabase.insert(
+            table: "lessons",
+            data: input
+        )
+        
+        return lesson
+    }
+    
+    func update(req: Request) async throws -> LessonDTO {
+        guard let lessonId = req.parameters.get("lessonId") else {
+            throw Abort(.badRequest, reason: "Missing lesson ID")
+        }
+        
+        let input = try req.content.decode(UpdateLessonDTO.self)
+        req.logger.info("📖 Updating lesson \(lessonId)")
+        
+        let lesson: LessonDTO = try await req.supabase.update(
+            table: "lessons",
+            id: lessonId,
+            data: input
+        )
+        
+        return lesson
+    }
+    
+    func delete(req: Request) async throws -> HTTPStatus {
+        guard let lessonId = req.parameters.get("lessonId") else {
+            throw Abort(.badRequest, reason: "Missing lesson ID")
+        }
+        
+        req.logger.info("📖 Deleting lesson \(lessonId)")
+        try await req.supabase.delete(
+            table: "lessons",
+            id: lessonId
+        )
+        
+        return .noContent
     }
 }
 

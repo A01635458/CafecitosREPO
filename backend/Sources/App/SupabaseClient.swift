@@ -47,7 +47,7 @@ struct SupabaseClient {
     }
     
     // MARK: - Insert
-    func insert<T: Content>(table: String, data: T) async throws -> T {
+    func insert<T: Content, R: Content>(table: String, data: T) async throws -> R {
         let uri = URI(string: "\(baseURL)/rest/v1/\(table)")
         
         let response = try await client.post(uri) { req in
@@ -61,7 +61,7 @@ struct SupabaseClient {
             throw Abort(.internalServerError, reason: "Supabase API error: \(response.status)")
         }
         
-        let results = try response.content.decode([T].self)
+        let results = try response.content.decode([R].self)
         guard let result = results.first else {
             throw Abort(.internalServerError, reason: "No data returned from insert")
         }
@@ -70,7 +70,7 @@ struct SupabaseClient {
     }
     
     // MARK: - Update
-    func update<T: Content>(table: String, id: String, data: T) async throws -> T {
+    func update<T: Content, R: Content>(table: String, id: String, data: T) async throws -> R {
         let uri = URI(string: "\(baseURL)/rest/v1/\(table)?id=eq.\(id)")
         
         let response = try await client.patch(uri) { req in
@@ -84,7 +84,7 @@ struct SupabaseClient {
             throw Abort(.internalServerError, reason: "Supabase API error: \(response.status)")
         }
         
-        let results = try response.content.decode([T].self)
+        let results = try response.content.decode([R].self)
         guard let result = results.first else {
             throw Abort(.notFound)
         }
