@@ -1,0 +1,51 @@
+import XCTest
+
+final class CafecitosAppUITests: XCTestCase {
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+    }
+
+    override func tearDownWithError() throws {
+    }
+
+    @MainActor
+    func testLoginAndModuleViewFlow() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        // CP-UI-001: Simular el inicio de sesión
+        let emailTextField = app.textFields["EmailAddressTextField"]
+        XCTAssertTrue(emailTextField.exists)
+        emailTextField.tap()
+        emailTextField.typeText("usuario@cafecitos.com")
+
+        let passwordSecureField = app.secureTextFields["PasswordSecureField"]
+        XCTAssertTrue(passwordSecureField.exists)
+        passwordSecureField.tap()
+        passwordSecureField.typeText("miclavesegura")
+
+        let loginButton = app.buttons["LoginButton"]
+        XCTAssertTrue(loginButton.exists)
+        loginButton.tap()
+
+        // CP-UI-002: Verificar la vista de módulos
+        let modulesNavigationBar = app.navigationBars["ModulesTitle"]
+        XCTAssertTrue(modulesNavigationBar.exists)
+
+        let firstModuleCell = app.cells.staticTexts["Introducción a Swift"]
+        XCTAssertTrue(firstModuleCell.waitForExistence(timeout: 5))
+        firstModuleCell.tap()
+
+        // Verificar que se navega a la vista de lecciones
+        let lessonTitle = app.staticTexts["Lección 1: Variables"]
+        XCTAssertTrue(lessonTitle.waitForExistence(timeout: 2))
+    }
+
+    @MainActor
+    func testLaunchPerformance() throws {
+        measure(metrics: [XCTApplicationLaunchMetric()]) {
+            XCUIApplication().launch()
+        }
+    }
+}
