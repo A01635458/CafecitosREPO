@@ -1,36 +1,39 @@
 import Vapor
 
+struct APIInfo: Content {
+    let name: String
+    let version: String
+    let mode: String
+    let endpoints: [String]
+}
+
 func routes(_ app: Application) throws {
     // Health Check
     app.get("health") { req async -> [String: String] in
-        ["status": "ok", "message": "Cafecitos API running"]
+        ["status": "ok", "message": "Cafecitos API running with Supabase REST"]
     }
 
     // Root Info
-    app.get { req async throws -> Response in
-        let json: [String: Any] = [
-            "name": "Cafecitos Learning API",
-            "version": "1.0.0",
-            "endpoints": [
+    app.get { req async throws -> APIInfo in
+        APIInfo(
+            name: "Cafecitos Learning API",
+            version: "1.0.0",
+            mode: "Supabase REST API",
+            endpoints: [
                 "GET /health",
                 "GET /api/modules",
                 "GET /api/modules/:id",
                 "GET /api/modules/:id/lessons",
                 "GET /api/lessons",
                 "GET /api/lessons/:id",
-                "POST /api/progress",
-                "GET /api/users/:id/progress"
+                "GET /api/users",
+                "GET /api/users/:id"
             ]
-        ]
-        let data = try JSONSerialization.data(withJSONObject: json)
-        return Response(status: .ok, body: .init(data: data))
+        )
     }
 
-    // Controllers
-    try app.register(collection: UserController())
-    try app.register(collection: PhotoController())
-    try app.register(collection: ModuleController())
-    try app.register(collection: LessonController())
-    try app.register(collection: NoteController())
-    try app.register(collection: ProgressController())
+    // REST Controllers
+    try app.register(collection: ModuleRestController())
+    try app.register(collection: LessonRestController())
+    try app.register(collection: UserRestController())
 }
