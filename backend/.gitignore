@@ -1,0 +1,47 @@
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+*.xcodeproj
+xcuserdata/
+DerivedData/
+
+# Environment variables
+.env
+
+# macOS
+.DS_Store
+
+# Vapor
+App.xcworkspace/
+
+# Linux
+*.swp
+*~
+
+# Xcode
+*.xcuserstate
+*.xcworkspace
+!default.xcworkspace
+
+# Build artifacts
+.swiftpm/
+*.o
+*.a
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+tmp/
+temp/
