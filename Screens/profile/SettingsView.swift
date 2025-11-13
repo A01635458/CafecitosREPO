@@ -22,3 +22,7 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+
+#Preview {
+    SettingsView()
+}
