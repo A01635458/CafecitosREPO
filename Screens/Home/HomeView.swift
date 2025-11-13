@@ -267,11 +267,7 @@ struct HomeView: View {
                     
                     // MARK: - Ver temario completo
                     VStack(alignment: .center) {
-                        Button {
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                selectedTab = 2 // Cambia a “Aprender”
-                            }
-                        } label: {
+                        NavigationLink(destination: LearnView()) {
                             Label("Ver temario completo", systemImage: "book.fill")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundStyle(.white)
@@ -283,6 +279,7 @@ struct HomeView: View {
                         }
                         .padding(.horizontal, 20)
                     }
+                    
 
                     Spacer().frame(height: 60)
                 }

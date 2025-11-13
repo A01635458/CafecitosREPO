@@ -15,3 +15,7 @@ struct AchievementsView: View {
         .navigationTitle("Logros")
     }
 }
+
+#Preview {
+    AchievementsView()
+}

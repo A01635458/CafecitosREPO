@@ -127,6 +127,7 @@ struct CreateModuleDTO: Codable {
 
 // MARK: - Learn View con API Integration
 struct LearnView: View {
+    @Environment(\.dismiss) var dismiss
     @StateObject private var apiService = CafecitosAPIService.shared
     @State private var showCreateSheet = false
     @State private var newModuleTitle = ""
@@ -136,7 +137,24 @@ struct LearnView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: 0) {
+                    
+                    Button {
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                            dismiss()
+                        }
+                    } label: {
+                        Label("Regresar", systemImage: "arrow.left.circle.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color.ka_coffee)
+                            .cornerRadius(12)
+                            .shadow(color: .ka_coffee.opacity(0.3), radius: 5, y: 3)
+                    }
+                    .padding(.top, 20)
+                    .padding(.leading, 20)
                     
                     // MARK: - Encabezado
                     VStack(alignment: .leading, spacing: 8) {

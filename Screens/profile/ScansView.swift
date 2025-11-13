@@ -15,3 +15,7 @@ struct ScansView: View {
         .navigationTitle("Escaneos")
     }
 }
+
+#Preview {
+    ScansView()
+}
