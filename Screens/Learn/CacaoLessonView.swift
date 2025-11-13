@@ -53,3 +53,7 @@ struct CacaoLessonView: View {
         .background(Color.ka_bg.ignoresSafeArea())
     }
 }
+
+#Preview {
+    CacaoLessonView()
+}

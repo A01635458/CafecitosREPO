@@ -49,3 +49,7 @@ struct RoastingLessonView: View {
         .background(Color.ka_bg.ignoresSafeArea())
     }
 }
+
+#Preview {
+    RoastingLessonView()
+}

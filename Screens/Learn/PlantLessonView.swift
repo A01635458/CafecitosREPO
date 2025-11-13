@@ -54,3 +54,7 @@ struct PlantLessonView: View {
         .background(Color.ka_bg.ignoresSafeArea())
     }
 }
+
+#Preview {
+    PlantLessonView()
+}

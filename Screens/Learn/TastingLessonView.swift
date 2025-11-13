@@ -49,3 +49,7 @@ struct TastingLessonView: View {
         .background(Color.ka_bg.ignoresSafeArea())
     }
 }
+
+#Preview {
+    TastingLessonView()
+}
