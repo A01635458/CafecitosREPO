@@ -264,24 +264,6 @@ struct HomeView: View {
                         }
                         .padding(.horizontal, 20)
                     }
-                    
-                    // MARK: - Ver temario completo
-                    VStack(alignment: .center) {
-                        NavigationLink(destination: LearnView()) {
-                            Label("Ver temario completo", systemImage: "book.fill")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .padding(.vertical, 14)
-                                .frame(maxWidth: .infinity)
-                                .background(Color.ka_coffee)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: .ka_coffee.opacity(0.3), radius: 5, y: 3)
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    
-
-                    Spacer().frame(height: 60)
                 }
             }
             .background(Color.ka_bg.ignoresSafeArea())
