@@ -29,7 +29,7 @@ struct CameraView: View {
                 
                 Text("Escanear planta o grano")
                     .font(.system(size: 24, weight: .bold))
-                Text("Usa la cámara para identificar la etapa del proceso del café y aprender sobre ella.")
+                Text("Usa la cámara para identificar que tipo de planta o grano es y aprender mas sobre ella.")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
