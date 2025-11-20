@@ -29,11 +29,13 @@ struct CameraView: View {
                 
                 Text("Escanear planta o grano")
                     .font(.system(size: 24, weight: .bold))
+                    .foregroundStyle(.black)
                 Text("Usa la cámara para identificar el tipo de grano que es y aprender mas sobre ella.")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 30)
+                    .foregroundStyle(.black)
                 
                 Button {
                     showScanner = true
@@ -52,7 +54,14 @@ struct CameraView: View {
                 Spacer()
             }
             .background(Color.ka_bg.ignoresSafeArea())
-            .navigationTitle("Cámara")
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Camara")
+                        .font(.largeTitle)
+                        .foregroundColor(.black)
+                        .bold()
+                }
+            }
             .sheet(isPresented: $showScanner) {
                 CameraScreen() // tu cámara funcional
             }
