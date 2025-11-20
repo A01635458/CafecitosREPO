@@ -460,6 +460,9 @@ struct NotesView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                Text("Notas")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.black)
                 Color.ka_bg.ignoresSafeArea()
 
                 if notes.isEmpty {
@@ -468,8 +471,10 @@ struct NotesView: View {
                         Image(systemName: "note.text")
                             .font(.system(size: 50))
                             .foregroundStyle(.secondary)
+                            .foregroundStyle(.black)
                         Text("Aún no hay notas")
                             .foregroundStyle(.secondary)
+                            .foregroundStyle(.black)
                         Spacer()
                     }
                     .multilineTextAlignment(.center)
@@ -481,10 +486,12 @@ struct NotesView: View {
                                 Text(note.title.isEmpty ? "Sin título" : note.title)
                                     .font(.headline)
                                     .foregroundStyle(.primary)
+                                    .foregroundStyle(.black)
                                 Text(note.content.isEmpty ? "Sin contenido" : note.content)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(2)
+                                    .foregroundStyle(.black)
                                 Text(note.date.formatted(date: .abbreviated, time: .shortened))
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
@@ -498,7 +505,14 @@ struct NotesView: View {
                     .listStyle(.insetGrouped)
                 }
             }
-            .navigationTitle("Notas")
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Notas")
+                        .font(.largeTitle)
+                        .foregroundColor(.black)
+                        .bold()
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {

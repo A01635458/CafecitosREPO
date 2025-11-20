@@ -57,9 +57,10 @@ struct LessonTextBlock: View {
         VStack(alignment: .leading, spacing: 14) {
             Text(title)
                 .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(.black)
             Text(text)
                 .font(.system(size: 16))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.black)
         }
         .padding(.horizontal, 20)
     }
@@ -141,6 +142,7 @@ struct QuizWidget: View {
                 .foregroundColor(.ka_coffee)
             Text(question)
                 .font(.system(size: 16))
+                .foregroundStyle(.black)
             
             ForEach(options.indices, id: \.self) { i in
                 Button {
@@ -178,8 +180,9 @@ struct LessonCameraSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Ejercicio práctico")
                 .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(.black)
             Text(instruction)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.black)
             Button {
                 showCamera = true
             } label: {

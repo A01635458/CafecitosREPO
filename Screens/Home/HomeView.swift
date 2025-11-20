@@ -176,9 +176,11 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Hola!")
                                     .font(.system(size: 24, weight: .bold))
+                                    .foregroundStyle(.black)
                                 Text("Aquí está tu progreso actual")
                                     .font(.system(size: 14))
                                     .foregroundStyle(.secondary)
+                                    .foregroundStyle(.black)
                             }
                             Spacer()
                             AsyncImage(url: URL(string: "https://images.pexels.com/photos/1695052/pexels-photo-1695052.jpeg")) { img in
@@ -192,10 +194,12 @@ struct HomeView: View {
                             HStack {
                                 Text("Progreso total")
                                     .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(.black)
                                 Spacer()
                                 Text("\(Int(animatedProgress * 100))%")
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundStyle(.secondary)
+                                    .foregroundStyle(.black)
                             }
                             ProgressView(value: animatedProgress)
                                 .tint(.ka_coffee)
@@ -209,9 +213,11 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(" Fun Fact del Día")
                             .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(.black)
                         Text("¿Sabías que el café fue descubierto por un pastor etíope llamado Kaldi, que notó que sus cabras se volvían más activas después de comer frutos de café?")
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
+                            .foregroundStyle(.black)
                     }
                     .padding(20)
                     .background(Color.ka_surface)
@@ -224,6 +230,7 @@ struct HomeView: View {
                         Text("Siguiente lección recomendada")
                             .font(.system(size: 20, weight: .bold))
                             .padding(.horizontal, 20)
+                            .foregroundStyle(.black)
                         
                         NavigationLink(destination: CacaoLessonView()) {
                             ZStack(alignment: .bottomLeading) {
@@ -255,12 +262,17 @@ struct HomeView: View {
                         Text("Resumen de tus módulos")
                             .font(.system(size: 20, weight: .bold))
                             .padding(.horizontal, 20)
+                            .foregroundStyle(.black)
                         
                         VStack(spacing: 14) {
                             ModuleRow(title: "La planta del café", progress: 0.9)
+                                .foregroundStyle(.black)
                             ModuleRow(title: " Del cacao a la especialidad", progress: 0.45)
+                                .foregroundStyle(.black)
                             ModuleRow(title: " Tueste y aroma", progress: 0.2)
+                                .foregroundStyle(.black)
                             ModuleRow(title: "Cata y especialidades", progress: 0.6)
+                                .foregroundStyle(.black)
                         }
                         .padding(.horizontal, 20)
                     }

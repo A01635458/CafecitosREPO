@@ -6,9 +6,11 @@ struct AchievementsView: View {
             Text(" Logros")
                 .font(.system(size: 28, weight: .bold))
                 .padding(.top, 40)
+                .foregroundStyle(.black)
             Spacer()
             Text("Aún no inicias una leccion")
                 .foregroundStyle(.secondary)
+                .foregroundStyle(.black)
             Spacer()
         }
         .background(Color.ka_bg.ignoresSafeArea())

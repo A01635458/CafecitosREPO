@@ -149,6 +149,7 @@ struct ProfileView: View {
                 HStack {
                     Text("Perfil")
                         .font(.system(size: 32, weight: .bold))
+                        .foregroundStyle(.black)
                     Spacer()
                     NavigationLink(destination: SettingsView()) {
                         Image(systemName: "gearshape")
@@ -177,6 +178,7 @@ struct ProfileView: View {
                                     )
                                 Text("Usuario")
                                     .font(.system(size: 24, weight: .bold))
+                                    .foregroundStyle(.black)
                                 Text("usuario@ejemplo.com")
                                     .foregroundStyle(.secondary)
                             }
@@ -199,15 +201,19 @@ struct ProfileView: View {
 
                         // Acerca de
                         ProfileSectionTitle("Acerca de")
+                            .foregroundStyle(.black)
                         Card {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Káapeh México")
                                     .font(.system(size: 18, weight: .bold))
+                                    .foregroundStyle(.black)
                                 Text("Aplicación educativa para aprender sobre el proceso del café, desde la planta hasta la taza.")
                                     .foregroundStyle(.secondary)
+                                    .foregroundStyle(.black)
                                 Text("Versión 1.0.0")
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
+                                    .foregroundStyle(.black)
                             }
                         }
 

@@ -6,6 +6,7 @@ struct SettingsView: View {
             Text("Configuración de cuenta")
                 .font(.system(size: 24, weight: .bold))
                 .padding(.top, 40)
+                .foregroundStyle(.black)
 
             Form {
                 Section("Información del usuario") {
@@ -17,7 +18,7 @@ struct SettingsView: View {
                 }
             }
         }
-        .background(Color.ka_bg.ignoresSafeArea())
+        .background(Color.brown.ignoresSafeArea())
         .navigationTitle("Ajustes")
         .navigationBarTitleDisplayMode(.inline)
     }
