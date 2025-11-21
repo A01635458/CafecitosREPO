@@ -15,10 +15,7 @@ struct KaapehApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootTabView()
-                .tint(.ka_coffee)
-                // Inyectar el mismo contexto globalmente
-                .modelContainer(container)
+            AppView()
         }
     }
 }
