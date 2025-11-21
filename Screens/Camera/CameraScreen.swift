@@ -12,7 +12,7 @@ import CoreML
 final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelegate {
     @Published var isRunning = false
     @Published var lastImage: UIImage?
-    @Published var detectedLabel: String? // ← etiqueta detectada del modelo
+    @Published var detectedLabel: String?
     
     let session = AVCaptureSession()
     private let output = AVCapturePhotoOutput()
@@ -25,10 +25,9 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
     }
 
     private func loadModel() {
-        // Carga del modelo GatosyPerros.ml
-        guard let mlModel = try? GatosyPerros(configuration: MLModelConfiguration()).model,
+        guard let mlModel = try? GranosClassifier(configuration: MLModelConfiguration()).model,
               let vnModel = try? VNCoreMLModel(for: mlModel) else {
-            print("⚠️ No se pudo cargar el modelo GatosyPerros.ml")
+            print("⚠️ No se pudo cargar el modelo GranosClassifier.ml")
             return
         }
         self.model = vnModel
@@ -144,7 +143,7 @@ struct CameraScreen: View {
 
                 Spacer()
 
-                Text("Enfoca un gato o un perro 🐾")
+                Text("Enfoca un grano de cafe 🫘")
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .semibold))
                     .shadow(radius: 4)
@@ -166,9 +165,11 @@ struct CameraScreen: View {
                 VStack(spacing: 16) {
                     Text(popupTitle)
                         .font(.system(size: 22, weight: .bold))
+                        .foregroundStyle(.black)
                     Text(popupText)
                         .font(.system(size: 15))
                         .multilineTextAlignment(.center)
+                        .foregroundStyle(.black)
                     Button("Cerrar") {
                         withAnimation { showPopup = false }
                     }
@@ -185,13 +186,49 @@ struct CameraScreen: View {
         .onChange(of: camera.detectedLabel) { _, newLabel in
             guard let label = newLabel else { return }
             switch label {
-            case "dog":
-                popupTitle = "🐶 Perro detectado"
-                popupText = "Los perros son animales leales y sociales. En este ejemplo, podrías mostrar información educativa sobre su rol en la caficultura o su entorno."
+            case "agrio":
+                popupTitle = "🍋 Grano Agrio"
+                popupText = "Los granos agrios provienen usualmente de frutos sobremaduros o fermentados antes del despulpado. Esto puede ocurrir cuando las cerezas permanecen demasiado tiempo en el suelo o en el árbol después de madurar. Estos granos generan sabores a vinagre, limón intenso o fermentación indeseada, afectando gravemente el perfil de taza. Su identificación y separación es crucial para mantener la calidad del café."
                 withAnimation { showPopup = true }
-            case "cat":
-                popupTitle = "🐱 Gato detectado"
-                popupText = "Los gatos son animales observadores y ágiles. En el contexto de Káapeh, podrías mostrar datos curiosos o su relación con las fincas de café."
+            case "cereza seca":
+                popupTitle = "🌰 Cereza Seca"
+                popupText = "Las cerezas secas son frutos que se deshidrataron sin ser recolectados o sin pasar por el proceso de despulpado. Esto puede suceder por recolección tardía o mal manejo en la finca. Son extremadamente duras y no permiten una separación adecuada durante la trilla. En la taza generan sabores terrosos, a madera seca o astringentes."
+                withAnimation { showPopup = true }
+            case "conchas":
+                popupTitle = "🟤 Grano Concha"
+                popupText = "Los granos concha se caracterizan por ser huecos, muy livianos y con forma irregular. Se producen cuando la semilla no se desarrolla completamente por falta de nutrientes, estrés hídrico o defectos genéticos. Durante el tostado tienden a quemarse más rápido, provocando notas amargas o sabores a quemado. Son considerados un defecto serio en la clasificación."
+                withAnimation { showPopup = true }
+            case "esponjoso":
+                popupTitle = "☁️ Grano Esponjoso"
+                popupText = "El grano esponjoso presenta una textura ligera y poco densa debido a una mala deshidratación o secado demasiado rápido. Estos granos absorben el calor de manera irregular durante el tostado y producen sabores planos, falta de cuerpo y una extracción dispareja en la preparación final."
+                withAnimation { showPopup = true }
+            case "fogueado":
+                popupTitle = "🔥 Grano Fogueado"
+                popupText = "El grano fogueado es el resultado de un secado excesivo o exposición directa a temperaturas muy altas, comúnmente cuando se extiende el café bajo el sol intenso sin protección. Este daño provoca un aspecto quemado o tostado prematuro, generando sabores ahumados, a madera quemada o amargor indeseado."
+                withAnimation { showPopup = true }
+            case "veteado":
+                popupTitle = "⚡ Grano Veteado"
+                popupText = "Los granos veteados presentan líneas internas o variaciones de color que indican problemas en su formación, como deficiencias nutricionales, estrés por sombra excesiva o enfermedades durante el desarrollo del fruto. Los granos veteados presentan líneas internas o variaciones de color que indican problemas en su formación, como deficiencias nutricionales, estrés por sombra excesiva o enfermedades durante el desarrollo del fruto."
+                withAnimation { showPopup = true }
+            case "cafeblanco":
+                popupTitle = "⚪ Café Blanco"
+                popupText = "El café blanco tiene un color muy claro debido a un despulpado incompleto o falta de desarrollo del mucílago. También puede ser un indicador de inmadurez interna del grano. En taza produce sabores apagados, muy bajos en dulzor y con acidez punzante. Su presencia suele indicar fallas en el beneficio húmedo."
+                withAnimation { showPopup = true }
+            case "cafeinmaduro":
+                popupTitle = "🟢 Café Inmaduro"
+                popupText = "Los granos inmaduros provienen de frutos verdes cosechados antes de tiempo. Estos granos tienen baja concentración de azúcares y compuestos aromáticos. En la taza aportan sabores vegetales, amargos y una acidez muy marcada y poco agradable. Su separación es esencial para evitar perfiles de taza defectuosos."
+                withAnimation { showPopup = true }
+            case "cafenegro":
+                popupTitle = "⚫ Café Negro"
+                popupText = "El café negro suele ser resultado de fermentación avanzada, daño por humedad, enfermedades o mal almacenamiento. Estos granos absorben sabores indeseados del entorno, presentan riesgo microbiológico y son uno de los defectos más críticos en la clasificación. Aportan sabores a moho, tierra húmeda o fermento excesivo."
+                withAnimation { showPopup = true }
+            case "cafepergamino":
+                popupTitle = "📜 Café en Pergamino"
+                popupText = "El café pergamino conserva la capa protectora que envuelve al grano. Si aparece en la clasificación final es señal de un trillado deficiente o de una calibración incorrecta de las máquinas. Aunque no siempre implica un defecto del grano, sí afecta la consistencia del proceso de beneficio seco y debe removerse para mantener la uniformidad."
+                withAnimation { showPopup = true }
+            case "dañoporhongo":
+                popupTitle = "🍄 Grano Dañado por Hongo"
+                popupText = "Los granos dañados por hongo presentan manchas, coloración irregular, textura quebradiza o puntos oscuros característicos. Son consecuencia de exceso de humedad en la fermentación, almacenamiento inadecuado o lluvias durante el secado. Estos granos afectan la inocuidad del producto y generan sabores a moho, tierra mojada o fermentación indeseada. Deben ser eliminados completamente."
                 withAnimation { showPopup = true }
             default:
                 break
