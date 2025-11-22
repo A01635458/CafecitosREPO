@@ -1,131 +1,107 @@
 import SwiftUI
-import Combine
 
-// MARK: - API Service
-class CafecitosAPIService: ObservableObject {
-    static let shared = CafecitosAPIService()
-    private let baseURL = "http://localhost:8080"
+//Muestra el contenido de la lección usando el campo content_url.
+struct LessonDetailView: View {
+    let lesson: LessonDTO
     
-    @Published var modules: [ModuleDTO] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    
-    private init() {}
-    
-    // MARK: - GET Modules
-    func fetchModules() async {
-        await MainActor.run {
-            isLoading = true
-            errorMessage = nil
-        }
-        
-        guard let url = URL(string: "\(baseURL)/api/modules") else {
-            await MainActor.run {
-                errorMessage = "URL inválida"
-                isLoading = false
-            }
-            return
-        }
-        
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let fetchedModules = try decoder.decode([ModuleDTO].self, from: data)
-            
-            await MainActor.run {
-                modules = fetchedModules
-                isLoading = false
-            }
-            print("✅ GET exitoso: \(fetchedModules.count) módulos obtenidos")
-        } catch {
-            await MainActor.run {
-                errorMessage = "Error al obtener módulos: \(error.localizedDescription)"
-                isLoading = false
-            }
-            print("❌ Error GET: \(error)")
-        }
-    }
-    
-    // MARK: - POST Module
-    func createModule(title: String, description: String, sortOrder: Int) async -> ModuleDTO? {
-        await MainActor.run {
-            isLoading = true
-            errorMessage = nil
-        }
-        
-        guard let url = URL(string: "\(baseURL)/api/modules") else {
-            await MainActor.run {
-                errorMessage = "URL inválida"
-                isLoading = false
-            }
-            return nil
-        }
-        
-        let newModule = CreateModuleDTO(
-            title: title,
-            description: description,
-            sort_order: sortOrder,
-            is_active: true
-        )
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            let encoder = JSONEncoder()
-            request.httpBody = try encoder.encode(newModule)
-            
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                await MainActor.run {
-                    errorMessage = "Error del servidor"
-                    isLoading = false
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                
+                //Título de la Lección
+                Text(lesson.title)
+                    .font(.largeTitle.bold())
+                    .padding(.bottom, 10)
+                
+                //Contenido de la Lección
+                if let content = lesson.content_url {
+                    Text(content)
+                        .font(.body)
+                        .lineSpacing(4)
+                } else {
+                    Text("Esta lección no tiene contenido disponible.")
+                        .foregroundColor(.secondary)
                 }
-                return nil
+                
+                Spacer()
             }
+            .padding()
+        }
+        .navigationTitle(lesson.title)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+//Componente para mostrar una lección
+struct LessonRow: View {
+    let lesson: LessonDTO
+    
+    var body: some View {
+        HStack {
+            //Icono fijo, sin lógica de is_active
+            Image(systemName: "book.fill")
+                .foregroundColor(.blue)
             
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let createdModule = try decoder.decode(ModuleDTO.self, from: data)
-            print("✅ POST exitoso: Módulo '\(createdModule.title)' creado")
+            Text(lesson.title)
+                .font(.system(size: 16))
             
-            // Recargar lista después de crear
-            await fetchModules()
+            Spacer()
             
-            return createdModule
-        } catch {
-            await MainActor.run {
-                errorMessage = "Error al crear módulo: \(error.localizedDescription)"
-                isLoading = false
+            Image(systemName: "chevron.right")
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 8)
+    }
+}
+
+//Componente que combina la Tarjeta del Módulo y sus Lecciones
+struct ModuleWithLessonsView: View {
+    let module: ModuleDTO
+    @ObservedObject var apiService: CafecitosAPIService
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            
+            APIModuleCard(module: module)
+            
+            let associatedLessons = apiService.lessons(for: module.id)
+            
+            if !associatedLessons.isEmpty {
+                
+                DisclosureGroup(
+                    content: {
+                        HStack {
+                            Text("Lecciones Disponibles (\(associatedLessons.count))")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                    }
+                ) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        
+                        ForEach(associatedLessons) { lesson in
+                            
+                            NavigationLink(destination: LessonDetailView(lesson: lesson)) {
+                                LessonRow(lesson: lesson)
+                            }
+                            
+                            .padding(.horizontal, 20)
+                            .listRowInsets(EdgeInsets())
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+                
+                .accentColor(.blue)
+                .padding(.horizontal, 8)
             }
-            print("❌ Error POST: \(error)")
-            return nil
         }
     }
 }
 
-// MARK: - DTOs
-struct ModuleDTO: Codable, Identifiable {
-    let id: UUID
-    let title: String
-    let description: String?
-    let sort_order: Int
-    let is_active: Bool
-    let created_at: Date?
-}
-
-struct CreateModuleDTO: Codable {
-    let title: String
-    let description: String?
-    let sort_order: Int?
-    let is_active: Bool?
-}
-
-// MARK: - Learn View con API Integration
 struct LearnView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var apiService = CafecitosAPIService.shared
@@ -138,7 +114,7 @@ struct LearnView: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 32) {
-                    // MARK: - Encabezado
+                    
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Temario de lecciones")
                             .font(.largeTitle.bold())
@@ -147,14 +123,14 @@ struct LearnView: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                         
-                        // Botones de prueba API
+                        //Botones de prueba API
                         HStack(spacing: 12) {
                             Button {
                                 Task {
                                     await apiService.fetchModules()
                                 }
                             } label: {
-                                Label("Obtener Módulos", systemImage: "arrow.down.circle.fill")
+                                Label("Obtener Módulos/Lecciones", systemImage: "arrow.down.circle.fill")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 16)
@@ -179,7 +155,7 @@ struct LearnView: View {
                         }
                         .padding(.top, 8)
                         
-                        // Estado de carga
+                        //Estado de carga y error
                         if apiService.isLoading {
                             HStack {
                                 ProgressView()
@@ -191,7 +167,6 @@ struct LearnView: View {
                             .padding(.top, 4)
                         }
                         
-                        // Error message
                         if let error = apiService.errorMessage {
                             Text("⚠️ \(error)")
                                 .font(.caption)
@@ -199,29 +174,32 @@ struct LearnView: View {
                                 .padding(.top, 4)
                         }
                         
-                        // Contador de módulos
+                        // Contador de módulos y lecciones
                         if !apiService.modules.isEmpty {
-                            Text("📚 \(apiService.modules.count) módulos disponibles")
-                                .font(.caption)
-                                .foregroundColor(.green)
-                                .padding(.top, 4)
+                            HStack(spacing: 8) {
+                                Text("📚 \(apiService.modules.count) módulos")
+                                Text("•")
+                                Text("📝 \(apiService.lessons.count) lecciones")
+                            }
+                            .font(.caption)
+                            .foregroundColor(.green)
+                            .padding(.top, 4)
                         }
                     }
                     .padding(.top, 50)
                     .padding(.horizontal, 20)
 
-                    // MARK: - Módulos desde API
                     if apiService.modules.isEmpty && !apiService.isLoading {
                         VStack(spacing: 16) {
                             Image(systemName: "tray")
                                 .font(.system(size: 60))
                                 .foregroundColor(.gray.opacity(0.3))
-                            
+                                
                             Text("No hay módulos disponibles")
                                 .font(.headline)
                                 .foregroundColor(.secondary)
-                            
-                            Text("Presiona 'GET Módulos' para cargar o 'POST Módulo' para crear uno nuevo")
+                                
+                            Text("Presiona 'Obtener Módulos/Lecciones' para cargar o 'Publicar Módulo' para crear uno nuevo")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -231,7 +209,7 @@ struct LearnView: View {
                         .padding(.vertical, 60)
                     } else {
                         ForEach(apiService.modules) { module in
-                            APIModuleCard(module: module)
+                            ModuleWithLessonsView(module: module, apiService: apiService)
                         }
                     }
                 }
@@ -241,7 +219,6 @@ struct LearnView: View {
             .navigationTitle("")
             .navigationBarHidden(true)
             .task {
-                // Cargar módulos al iniciar
                 await apiService.fetchModules()
             }
             .sheet(isPresented: $showCreateSheet) {
@@ -274,7 +251,6 @@ struct LearnView: View {
     }
 }
 
-// MARK: - API Module Card
 struct APIModuleCard: View {
     let module: ModuleDTO
     
@@ -293,9 +269,6 @@ struct APIModuleCard: View {
                     }
                     
                     HStack(spacing: 8) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(module.is_active ? .green : .gray)
                         
                         Text("Orden: \(module.sort_order)")
                             .font(.caption)
@@ -319,7 +292,6 @@ struct APIModuleCard: View {
                     .foregroundColor(.blue.opacity(0.3))
             }
             
-            // Progress bar decorativo
             ProgressView(value: Double(module.sort_order) * 0.25, total: 1.0)
                 .progressViewStyle(LinearProgressViewStyle(tint: .blue))
         }
@@ -331,10 +303,10 @@ struct APIModuleCard: View {
                 .stroke(Color.blue.opacity(0.2), lineWidth: 1)
         )
         .padding(.horizontal, 20)
+        .padding(.top, 10)
     }
 }
 
-// MARK: - Create Module Sheet
 struct CreateModuleSheet: View {
     @Binding var isPresented: Bool
     @Binding var title: String
@@ -368,9 +340,4 @@ struct CreateModuleSheet: View {
             }
         }
     }
-}
-
-// MARK: - Preview
-#Preview {
-    LearnView()
 }
