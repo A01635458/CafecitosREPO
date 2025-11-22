@@ -4,13 +4,13 @@ import Supabase
 import Foundation
 
 struct ProfileView: View {
+    @ObservedObject var authViewModel: AuthViewModel
     // SwiftData: notas
     @Query private var notes: [NoteEntity]
 
     // Supabase: campos de perfil
     @State private var username: String = ""
     @State private var full_name: String = ""
-    @State private var website: String = ""
     @State private var email: String = ""
 
     @State private var isLoadingProfile = false
@@ -58,13 +58,10 @@ struct ProfileView: View {
 
                                 Text(full_name.isEmpty ? "Usuario" : full_name)
                                     .font(.system(size: 24, weight: .bold))
-<<<<<<< Updated upstream
                                     .foregroundStyle(.black)
-                                Text("usuario@ejemplo.com")
-=======
-
+                                Text(username.isEmpty ? "Nombre de usuario" : username)
+                                    .foregroundStyle(.secondary)
                                 Text(email.isEmpty ? "usuario@ejemplo.com" : email)
->>>>>>> Stashed changes
                                     .foregroundStyle(.secondary)
 
                                 if isLoadingProfile {
@@ -131,19 +128,6 @@ struct ProfileView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
                                 }
 
-                                Group {
-                                    Text("Website")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    TextField("https://ejemplo.com", text: $website)
-                                        .textContentType(.URL)
-                                        .textInputAutocapitalization(.never)
-                                        .keyboardType(.URL)
-                                        .padding(10)
-                                        .background(Color.ka_bg)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                }
-
                                 Button {
                                     updateProfileButtonTapped()
                                 } label: {
@@ -187,8 +171,7 @@ struct ProfileView: View {
                         // Logout -> Supabase signOut
                         Button {
                             Task {
-                                try? await supabase.auth.signOut()
-                                // Aquí podrías redirigir a la pantalla de login si usas algún router propio
+                                await authViewModel.signOut()
                             }
                         } label: {
                             Label("Cerrar sesión", systemImage: "arrow.right.square")
@@ -304,8 +287,4 @@ private struct ProfileSectionTitle: View {
     }
 }
 
-#Preview {
-    ProfileView()
-        .modelContainer(for: NoteEntity.self)
-}
 

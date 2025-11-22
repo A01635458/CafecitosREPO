@@ -9,21 +9,18 @@ import SwiftUI
 import Supabase
 
 struct AppView: View {
-  @State var isAuthenticated = false
+    @StateObject private var authViewModel = AuthViewModel()
   var body: some View {
     Group {
-      if isAuthenticated {
-        RootTabView()
+        if authViewModel.isAuthenticated {
+        RootTabView(authViewModel: authViewModel)
       } else {
-        AuthView()
+          AuthView(authViewModel: authViewModel)
       }
     }
     .task {
-      for await state in await supabase.auth.authStateChanges {
-        if [.initialSession, .signedIn, .signedOut].contains(state.event) {
-          isAuthenticated = state.session != nil
+        await authViewModel.getInitialSession()
         }
       }
     }
-  }
-}
+  
