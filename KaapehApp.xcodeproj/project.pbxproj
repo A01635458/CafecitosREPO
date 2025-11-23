@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		846FE85C2ED3A6710058D064 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 846FE85B2ED3A6710058D064 /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A11C38042EB2ABA300536820 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +33,22 @@
 		A11C380D2EB2ABA300536820 /* KaapehAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KaapehAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		846FE85E2ED3A6B60058D064 /* Exceptions for "KaapehApp" folder in "KaapehApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A11C37F52EB2ABA100536820 /* KaapehApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A11C37F82EB2ABA100536820 /* KaapehApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				846FE85E2ED3A6B60058D064 /* Exceptions for "KaapehApp" folder in "KaapehApp" target */,
+			);
 			path = KaapehApp;
 			sourceTree = "<group>";
 		};
@@ -57,6 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				846FE85C2ED3A6710058D064 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +137,7 @@
 			);
 			name = KaapehApp;
 			packageProductDependencies = (
+				846FE85B2ED3A6710058D064 /* Supabase */,
 			);
 			productName = KaapehApp;
 			productReference = A11C37F62EB2ABA100536820 /* KaapehApp.app */;
@@ -202,6 +221,9 @@
 			);
 			mainGroup = A11C37ED2EB2ABA100536820;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				846FE85A2ED3A6710058D064 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A11C37F72EB2ABA100536820 /* Products */;
 			projectDirPath = "";
@@ -407,6 +429,7 @@
 				DEVELOPMENT_TEAM = GLCMXK439C;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KaapehApp/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "uso camara";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -440,6 +463,7 @@
 				DEVELOPMENT_TEAM = GLCMXK439C;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KaapehApp/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "uso camara";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -587,6 +611,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		846FE85A2ED3A6710058D064 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase-community/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		846FE85B2ED3A6710058D064 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 846FE85A2ED3A6710058D064 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A11C37EE2EB2ABA100536820 /* Project object */;
 }

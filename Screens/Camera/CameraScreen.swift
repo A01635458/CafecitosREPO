@@ -34,17 +34,19 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
         self.model = vnModel
     }
 
-    private func configure() {
+    private func configure(position: AVCaptureDevice.Position) {
         session.beginConfiguration()
-        session.inputs.forEach { session.removeInput($0) }
+        
+        for input in session.inputs {
+            session.removeInput(input)
+        }
         
         session.sessionPreset = .photo
 
         guard
             let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position),
             let input = try? AVCaptureDeviceInput(device: device),
-            session.canAddInput(input),
-            session.canAddOutput(output)
+            session.canAddInput(input)
         else {
             print("⚠️ No se pudo configurar la cámara \(position)")
             session.commitConfiguration()
@@ -52,15 +54,25 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
         }
 
         session.addInput(input)
-        if session.outputs.isEmpty { session.addOutput(output) }
+        
+        if !session.outputs.contains(where: { $0 === output }) {
+            if session.canAddOutput(output) {
+                session.addOutput(output)
+            }
+        }
+        
         session.commitConfiguration()
     }
     
     func flipCamera() {
         currentPosition = (currentPosition == .back) ? .front : .back
-        configure(position: currentPosition)
+        session.stopRunning()
 
         DispatchQueue.global(qos: .userInitiated).async {
+            self.configure(position: self.currentPosition)
+            
+            usleep(30000)
+
             self.session.startRunning()
         }
     }

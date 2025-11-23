@@ -58,13 +58,10 @@ struct ProfileView: View {
 
                                 Text(full_name.isEmpty ? "Usuario" : full_name)
                                     .font(.system(size: 24, weight: .bold))
-<<<<<<< Updated upstream
                                     .foregroundStyle(.black)
                                 Text("usuario@ejemplo.com")
-=======
 
                                 Text(email.isEmpty ? "usuario@ejemplo.com" : email)
->>>>>>> Stashed changes
                                     .foregroundStyle(.secondary)
 
                                 if isLoadingProfile {
