@@ -8,6 +8,16 @@ import AVFoundation
 import Combine
 import Vision
 import CoreML
+import Supabase
+
+struct ScanEntry: Encodable {
+    let user_id: Int
+    let label: String
+    let info: String
+    let specialtyimpact: String
+    let preventiontips: String
+    let captured_at: String
+}
 
 final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelegate {
     @Published var isRunning = false
@@ -70,9 +80,7 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
 
         DispatchQueue.global(qos: .userInitiated).async {
             self.configure(position: self.currentPosition)
-            
             usleep(30000)
-
             self.session.startRunning()
         }
     }
@@ -116,6 +124,45 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
         DispatchQueue.global(qos: .userInitiated).async {
             try? handler.perform([request])
         }
+    }
+    
+    func saveScanToSupabase(
+        user_id: Int,
+        label: String,
+        info: String,
+        specialtyimpact: String,
+        preventiontips: String
+    ) {
+        Task {
+            do {
+                let entry = ScanEntry (
+                    user_id: user_id,
+                    label: label,
+                    info: info,
+                    specialtyimpact: specialtyimpact,
+                    preventiontips: preventiontips,
+                    captured_at: Date().iso8601String()
+                )
+
+                let response = try await supabase
+                    .from("scans")
+                    .insert(entry)
+                    .execute()
+
+                print("✅ Scan guardado en Supabase:", response)
+
+            } catch {
+                print("❌ Error guardando en Supabase:", error)
+            }
+        }
+    }
+}
+
+extension Date {
+    func iso8601String() -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.string(from: self)
     }
 }
 
@@ -315,6 +362,14 @@ struct CameraScreen: View {
             default:
                 break
             }
+            
+            camera.saveScanToSupabase(
+                user_id: 1,
+                label: label,
+                info: popupText,
+                specialtyimpact: specialtyImpact,
+                preventiontips: preventionTips
+            )
         }
     }
 }
