@@ -16,3 +16,13 @@ func testValidPasswordPasses() {
     #expect(isValidPassword("cafe1234") == true)
 }
 
+@MainActor
+@Test
+func testNormalizedLabel() async throws {
+    let cameraModel = CameraModel()
+    let rawLabel = "  CafeNegro  "
+    let expected = "cafenegro"
+    let processed = cameraModel.normalizedLabel(from: rawLabel)
+
+    #expect(processed == expected)
+}

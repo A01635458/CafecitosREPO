@@ -156,6 +156,10 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
             }
         }
     }
+    
+    func normalizedLabel(from rawIdentifier: String) -> String {
+        return rawIdentifier.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 }
 
 extension Date {
