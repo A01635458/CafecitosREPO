@@ -1,15 +1,18 @@
-//
-//  KaapehAppTests.swift
-//  KaapehAppTests
-//
-
 import Testing
 @testable import KaapehApp
 
-struct KaapehAppTests {
-
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-    }
-
+@Test("Contraseña demasiado corta falla")
+func testShortPasswordFails() {
+    #expect(isValidPassword("abc1def") == false)
 }
+
+@Test("Contraseña sin número falla")
+func testPasswordWithoutNumberFails() {
+    #expect(isValidPassword("abcdefgh") == false)
+}
+
+@Test("Contraseña válida pasa")
+func testValidPasswordPasses() {
+    #expect(isValidPassword("cafe1234") == true)
+}
+

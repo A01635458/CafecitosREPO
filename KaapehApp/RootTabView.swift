@@ -6,6 +6,7 @@
 import SwiftUI
 
 struct RootTabView: View {
+    @ObservedObject var authViewModel: AuthViewModel
     @State private var selectedTab = 1
 
     var body: some View {
@@ -23,7 +24,7 @@ struct RootTabView: View {
                 .tabItem { Label("Aprender", systemImage: "book.fill") }
                 .tag(2)
             
-            ProfileView()
+            ProfileView(authViewModel: authViewModel)
                 .tabItem { Label("Perfil", systemImage: "person.circle.fill") }
                 .tag(3)
         }
@@ -32,6 +33,4 @@ struct RootTabView: View {
     }
 }
 
-#Preview {
-    RootTabView()
-}
+

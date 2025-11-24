@@ -7,7 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		846FE85C2ED3A6710058D064 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 846FE85B2ED3A6710058D064 /* Supabase */; };
+		FB880EA42ED111A50069AF5B /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = FB880EA32ED111A50069AF5B /* Auth */; };
+		FB880EA62ED111A50069AF5B /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = FB880EA52ED111A50069AF5B /* Functions */; };
+		FB880EA82ED111A50069AF5B /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = FB880EA72ED111A50069AF5B /* PostgREST */; };
+		FB880EAA2ED111A50069AF5B /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = FB880EA92ED111A50069AF5B /* Realtime */; };
+		FB880EAC2ED111A50069AF5B /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = FB880EAB2ED111A50069AF5B /* Storage */; };
+		FB880EAE2ED111A50069AF5B /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = FB880EAD2ED111A50069AF5B /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,7 +39,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		846FE85E2ED3A6B60058D064 /* Exceptions for "KaapehApp" folder in "KaapehApp" target */ = {
+		FB84A3E62ED10F9500BB0A84 /* Exceptions for "KaapehApp" folder in "KaapehApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -47,7 +52,7 @@
 		A11C37F82EB2ABA100536820 /* KaapehApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				846FE85E2ED3A6B60058D064 /* Exceptions for "KaapehApp" folder in "KaapehApp" target */,
+				FB84A3E62ED10F9500BB0A84 /* Exceptions for "KaapehApp" folder in "KaapehApp" target */,
 			);
 			path = KaapehApp;
 			sourceTree = "<group>";
@@ -74,7 +79,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				846FE85C2ED3A6710058D064 /* Supabase in Frameworks */,
+				FB880EA82ED111A50069AF5B /* PostgREST in Frameworks */,
+				FB880EA62ED111A50069AF5B /* Functions in Frameworks */,
+				FB880EAE2ED111A50069AF5B /* Supabase in Frameworks */,
+				FB880EA42ED111A50069AF5B /* Auth in Frameworks */,
+				FB880EAC2ED111A50069AF5B /* Storage in Frameworks */,
+				FB880EAA2ED111A50069AF5B /* Realtime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,7 +147,12 @@
 			);
 			name = KaapehApp;
 			packageProductDependencies = (
-				846FE85B2ED3A6710058D064 /* Supabase */,
+				FB880EA32ED111A50069AF5B /* Auth */,
+				FB880EA52ED111A50069AF5B /* Functions */,
+				FB880EA72ED111A50069AF5B /* PostgREST */,
+				FB880EA92ED111A50069AF5B /* Realtime */,
+				FB880EAB2ED111A50069AF5B /* Storage */,
+				FB880EAD2ED111A50069AF5B /* Supabase */,
 			);
 			productName = KaapehApp;
 			productReference = A11C37F62EB2ABA100536820 /* KaapehApp.app */;
@@ -222,7 +237,7 @@
 			mainGroup = A11C37ED2EB2ABA100536820;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				846FE85A2ED3A6710058D064 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				FB880EA22ED111A50069AF5B /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A11C37F72EB2ABA100536820 /* Products */;
@@ -613,9 +628,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		846FE85A2ED3A6710058D064 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+		FB880EA22ED111A50069AF5B /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/supabase-community/supabase-swift";
+			repositoryURL = "https://github.com/supabase/supabase-swift";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.5.1;
@@ -624,9 +639,34 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		846FE85B2ED3A6710058D064 /* Supabase */ = {
+		FB880EA32ED111A50069AF5B /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 846FE85A2ED3A6710058D064 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			package = FB880EA22ED111A50069AF5B /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		FB880EA52ED111A50069AF5B /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB880EA22ED111A50069AF5B /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		FB880EA72ED111A50069AF5B /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB880EA22ED111A50069AF5B /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		FB880EA92ED111A50069AF5B /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB880EA22ED111A50069AF5B /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		FB880EAB2ED111A50069AF5B /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB880EA22ED111A50069AF5B /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		FB880EAD2ED111A50069AF5B /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB880EA22ED111A50069AF5B /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
 		};
 /* End XCSwiftPackageProductDependency section */
