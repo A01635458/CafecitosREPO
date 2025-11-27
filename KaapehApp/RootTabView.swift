@@ -24,9 +24,13 @@ struct RootTabView: View {
                 .tabItem { Label("Aprender", systemImage: "book.fill") }
                 .tag(2)
             
+            CoffeePlantListView()
+                .tabItem { Label("Plantas", systemImage: "leaf.fill") }
+                .tag(3)
+                
             ProfileView(authViewModel: authViewModel)
                 .tabItem { Label("Perfil", systemImage: "person.circle.fill") }
-                .tag(3)
+                .tag(4)
         }
         .tint(.ka_coffee)
         .background(Color.ka_surface)

@@ -3,19 +3,29 @@ import SwiftData
 
 @main
 struct KaapehApp: App {
-    // Crear un contenedor compartido (persistente)
     let container: ModelContainer
 
     init() {
-        // configuración del modelo compartido
-        let schema = Schema([NoteEntity.self])
+        let schema = Schema([NoteEntity.self, CoffeePlant.self])
         let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        container = try! ModelContainer(for: schema, configurations: [configuration])
+
+        do {
+            container = try ModelContainer(for: schema, configurations: [configuration])
+        } catch {
+            // ⚠️ SOLO PARA DESARROLLO:
+            // si la migración falla, borramos el store y lo recreamos
+            let url = configuration.url   // 👈 ya no es optional
+            try? FileManager.default.removeItem(at: url)
+            
+            container = try! ModelContainer(for: schema, configurations: [configuration])
+        }
     }
 
     var body: some Scene {
         WindowGroup {
             AppView()
         }
+        .modelContainer(container)
     }
 }
+
