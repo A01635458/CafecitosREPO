@@ -5,32 +5,35 @@ import Foundation
 
 @Model
 class CoffeePlant {
+    // Detalles de la planta
     @Attribute(.unique) var id: UUID
     var name: String
     var varietal: String
     var createdAt: Date
-    var stage: CoffeeStage
-    var stageStartedAt: Date   // ⬅️ para calcular el progreso de la etapa
+    var stage: CoffeeStage // Etapa de crecimiento
+    var stageStartedAt: Date
 
-    /// Nivel de agua de la planta (0–100)
-    var water: Int             // 0–100
-    /// Nivel de luz que recibe la planta (0–100)
-    var light: Int             // 0–100
-    
+    // Variables para jugabilidad
+    var water: Int             // Nivel de agua de la planta (0–100)
+    var light: Int             // Nivel de luz
     var lastWaterUpdate: Date?
     var lastLightUpdate: Date?
+    var qualityAccumulated: Double // calidad de la planta acumulada
+    var qualitySamples: Int // cuantas etapas han aportado
     
     init(
         id: UUID = UUID(),
         name: String,
-        varietal: String = "Bourbon",
+        varietal: String,
         createdAt: Date = .now,
         stage: CoffeeStage = .seed,
         stageStartedAt: Date = .now,
         water: Int = 50,
         light: Int = 30, // sombra
         lastWaterUpdate: Date? = nil,
-        lastLightUpdate: Date? = nil
+        lastLightUpdate: Date? = nil,
+        qualityAccumulated: Double = 0,
+        qualitySamples: Int = 0
     ) {
         self.id = id
         self.name = name
@@ -42,6 +45,8 @@ class CoffeePlant {
         self.light = light
         self.lastWaterUpdate = lastWaterUpdate
         self.lastLightUpdate = lastLightUpdate
+        self.qualityAccumulated = qualityAccumulated
+        self.qualitySamples = qualitySamples
     }
 }
 
@@ -124,13 +129,55 @@ struct EnvironmentRules {
 // MARK: - Lógica de juego (riego, luz, progreso, avances)
 
 extension CoffeePlant {
+    //  La lógica de "qué tan cerca" está de los rangos (0–1)
+    private func score(value: Int, in range: ClosedRange<Int>) -> Double {
+        if range.contains(value) {
+            return 1.0
+        }
+        let dist: Double
+        if value < range.lowerBound {
+            dist = Double(range.lowerBound - value)
+        } else {
+            dist = Double(value - range.upperBound)
+        }
+        // mientras más lejos del rango, peor score; a partir de ~50 puntos de diferencia es 0
+        let maxDist: Double = 50.0
+        return max(0.0, 1.0 - dist / maxDist)
+    }
     
-    /// ¿La planta cumple los requisitos de agua y luz para su etapa actual?
-    var environmentRequirementsMet: Bool {
+    // Score de calidad por etapa según agua + luz (0–1)
+    func stageQualityScore() -> Double {
         guard let req = EnvironmentRules.requirement(for: stage) else {
-            return true // si no hay requisitos, lo consideramos cumplido
+            return 1.0 // si no hay requisitos para esta etapa, cuenta como perfecto
         }
         
+        var total = 0.0
+        var factors = 0.0
+        
+        if let waterRange = req.waterRange {
+            total += score(value: water, in: waterRange)
+            factors += 1
+        }
+        if let lightRange = req.lightRange {
+            total += score(value: light, in: lightRange)
+            factors += 1
+        }
+        
+        guard factors > 0 else { return 1.0 }
+        return total / factors
+    }
+    
+    // Registrar la calidad de la etapa actual en los acumuladores globales
+    func registerStageQuality() {
+        let s = stageQualityScore()
+        qualityAccumulated += s
+        qualitySamples += 1
+    }
+    
+    var environmentRequirementsMet: Bool {
+        guard let req = EnvironmentRules.requirement(for: stage) else {
+            return true
+        }
         if let waterRange = req.waterRange, !waterRange.contains(water) {
             return false
         }
@@ -140,31 +187,26 @@ extension CoffeePlant {
         return true
     }
     
-    /// Acción de riego (sube el nivel de agua)
-    func waterPlant(amount: Int = 10) {
+    // Acciones de agua/luz
+    func waterPlant(amount: Int = 20) {
         water = min(100, water + amount)
         lastWaterUpdate = .now
     }
     
-    
-    
-    /// Cambiar luz a un valor específico (slider, pasos, etc.)
     func changeLight(to newValue: Int) {
         light = max(0, min(100, newValue))
         lastLightUpdate = .now
     }
     
-    /// Progreso de la etapa actual (0–1) según el tiempo
     var stageProgress: Double {
         let now = Date()
         let elapsed = now.timeIntervalSince(stageStartedAt)
         let duration = CoffeeStageTimeline.duration[stage] ?? 0
-        
         guard duration > 0 else { return 1.0 }
         return min(max(elapsed / duration, 0), 1)
     }
     
-    /// Intenta avanzar de etapa si ya pasó el tiempo y el ambiente es el correcto
+    // Avanzar etapa
     func updateStageIfNeeded() {
         // Si ya está en la última etapa, no hacemos nada
         guard let duration = CoffeeStageTimeline.duration[stage],
@@ -173,18 +215,32 @@ extension CoffeePlant {
         
         let now = Date()
         let elapsed = now.timeIntervalSince(stageStartedAt)
-                
-        // 2) Revisar si riego + luz están correctos
-        guard environmentRequirementsMet else {
-            // Aquí podrías penalizar calidad final, mostrar mensaje, etc.
-            return
-        }
         
-        // 3) Avanzar de etapa
+        
+        registerStageQuality()
+        
         if let next = CoffeeStageTimeline.nextStage(after: stage) {
             self.stage = next
             self.stageStartedAt = now
         }
     }
+    
+    // Score final de taza (0–100)
+    var finalCupScore: Int {
+        guard qualitySamples > 0 else { return 0 }
+        let normalized = qualityAccumulated / Double(qualitySamples) // 0–1
+        return Int((normalized * 100).rounded())
+    }
+    
+    // Texto de calificación (opcional)
+    var finalCupGrade: String {
+        let score = finalCupScore
+        switch score {
+        case 90...100: return "Excelente"
+        case 80..<90:  return "Muy buena"
+        case 70..<80:  return "Buena"
+        case 60..<70:  return "Aceptable"
+        default:       return "Baja calidad"
+        }
+    }
 }
-

@@ -82,6 +82,17 @@ struct CoffeePlantDetailView: View {
                             .font(.footnote)
                             .foregroundStyle(.orange)
                     }
+                    
+                    if plant.stage == .cup {
+                        VStack(spacing: 4) {
+                            Text("Calidad de taza: \(plant.finalCupScore)/100")
+                                .font(.headline)
+                            Text(plant.finalCupGrade)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.top, 8)
+                    }
                 }
                 .padding(16)
             }
