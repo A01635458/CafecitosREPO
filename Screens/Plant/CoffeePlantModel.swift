@@ -20,6 +20,7 @@ class CoffeePlant {
     var lastLightUpdate: Date?
     var qualityAccumulated: Double // calidad de la planta acumulada
     var qualitySamples: Int // cuantas etapas han aportado
+    var nutrientBonus: Double // nutrientes
     
     init(
         id: UUID = UUID(),
@@ -33,7 +34,8 @@ class CoffeePlant {
         lastWaterUpdate: Date? = nil,
         lastLightUpdate: Date? = nil,
         qualityAccumulated: Double = 0,
-        qualitySamples: Int = 0
+        qualitySamples: Int = 0,
+        nutrientBonus: Double = 0
     ) {
         self.id = id
         self.name = name
@@ -47,6 +49,7 @@ class CoffeePlant {
         self.lastLightUpdate = lastLightUpdate
         self.qualityAccumulated = qualityAccumulated
         self.qualitySamples = qualitySamples
+        self.nutrientBonus = nutrientBonus
     }
 }
 
@@ -61,61 +64,61 @@ struct EnvironmentRequirement {
 struct EnvironmentRules {
     // Ajusta los rangos según cómo quieras que se comporte tu "tamagotchi"
     static let requirements: [CoffeeStage: EnvironmentRequirement] = [
-        .seed: EnvironmentRequirement(
+        .seed: EnvironmentRequirement( // 1
             waterRange: 60...80,   // húmedo constante
             lightRange: 10...30    // sombra
         ),
-        .germination: EnvironmentRequirement(
+        .germination: EnvironmentRequirement( // 2
             waterRange: 60...80,
             lightRange: 10...30
         ),
-        .seedling: EnvironmentRequirement(
+        .seedling: EnvironmentRequirement( // 3
             waterRange: 50...70,
             lightRange: 30...50    // sombra parcial
         ),
-        .juvenile: EnvironmentRequirement(
+        .juvenile: EnvironmentRequirement( // 4
             waterRange: 50...70,
             lightRange: 30...50
         ),
-        .transplanted: EnvironmentRequirement(
+        .transplanted: EnvironmentRequirement( // 5
             waterRange: 50...70,
             lightRange: 20...40    // un poco más de sombra tras el estrés
         ),
-        .vegetative: EnvironmentRequirement(
+        .vegetative: EnvironmentRequirement( // 6
             waterRange: 40...60,
             lightRange: 40...70
         ),
-        .flowering: EnvironmentRequirement(
+        .flowering: EnvironmentRequirement( // 7
             waterRange: 40...60,
             lightRange: 40...70
         ),
-        .greenCherry: EnvironmentRequirement(
+        .greenCherry: EnvironmentRequirement( // 8
             waterRange: 40...60,
             lightRange: 60...100   // más sol
         ),
-        .ripeCherry: EnvironmentRequirement(
+        .ripeCherry: EnvironmentRequirement( // 9
             waterRange: 40...60,
             lightRange: 60...100
         ),
         // A partir de aquí el cafeto como planta ya no importa tanto,
         // son procesos post-cosecha:
-        .harvest: EnvironmentRequirement(
+        .harvest: EnvironmentRequirement( // 10
             waterRange: nil,
             lightRange: nil
         ),
-        .processing: EnvironmentRequirement(
+        .processing: EnvironmentRequirement( // 11
             waterRange: nil,
             lightRange: nil
         ),
-        .drying: EnvironmentRequirement(
+        .drying: EnvironmentRequirement( // 12
             waterRange: nil,
-            lightRange: 60...100   // sol para secado
+            lightRange: 60...100
         ),
-        .roasting: EnvironmentRequirement(
+        .roasting: EnvironmentRequirement( // 13
             waterRange: nil,
             lightRange: nil
         ),
-        .cup: EnvironmentRequirement(
+        .cup: EnvironmentRequirement( // 14
             waterRange: nil,
             lightRange: nil
         )
@@ -198,6 +201,21 @@ extension CoffeePlant {
         lastLightUpdate = .now
     }
     
+    @discardableResult
+    func applyNutrients(_ package: NutrientPackage) -> Bool {
+        let recommended = NutrientRules.recommendedPackage(for: stage)
+        
+        if package == recommended {
+            // Elección correcta → sumamos bonus
+            nutrientBonus += 0.5     // puedes ajustar magnitud
+            return true
+        } else {
+            // Elección incorrecta → penalizamos un poco
+            nutrientBonus -= 0.25
+            return false
+        }
+    }
+    
     var stageProgress: Double {
         let now = Date()
         let elapsed = now.timeIntervalSince(stageStartedAt)
@@ -225,12 +243,34 @@ extension CoffeePlant {
         }
     }
     
+    var timeInStageDescription: String {
+        let seconds = Date().timeIntervalSince(stageStartedAt)
+        
+        let minutes = Int(seconds / 60)
+        let hours = Int(seconds / 3600)
+        let days = hours / 24
+        
+        if days > 0 {
+            return "\(days) día\(days == 1 ? "" : "s") \(hours % 24) h"
+        } else if hours > 0 {
+            return "\(hours) h \(minutes % 60) min"
+        } else {
+            return "\(minutes) min"
+        }
+    }
+
+    
     // Score final de taza (0–100)
     var finalCupScore: Int {
-        guard qualitySamples > 0 else { return 0 }
-        let normalized = qualityAccumulated / Double(qualitySamples) // 0–1
-        return Int((normalized * 100).rounded())
-    }
+            guard qualitySamples > 0 else {
+                let base = max(0.0, min(1.0, nutrientBonus / 5.0))
+                return Int((base * 100).rounded())
+            }
+            let baseQuality = qualityAccumulated / Double(qualitySamples) // 0–1
+            let combined = baseQuality + (nutrientBonus / 10.0)           // escala bonus
+            let clamped = max(0.0, min(1.0, combined))
+            return Int((clamped * 100).rounded())
+        }
     
     // Texto de calificación (opcional)
     var finalCupGrade: String {
