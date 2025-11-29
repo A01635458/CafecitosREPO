@@ -1,6 +1,11 @@
 import SwiftUI
 import SwiftData
 
+
+
+
+// MARK: - Lista de plantas
+
 struct CoffeePlantListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \CoffeePlant.createdAt, order: .forward) private var plants: [CoffeePlant]
@@ -75,12 +80,13 @@ struct CoffeePlantListView: View {
             }
         }
         .sheet(isPresented: $isPresentingAdd) {
-            AddCoffeePlantView()
+            AddCoffeePlantView()   // 👈 aquí usamos la vista correcta
         }
     }
 }
 
-// Card resumida para la lista
+// MARK: - Card resumida para la lista
+
 private struct CoffeePlantCard: View {
     let plant: CoffeePlant
     
@@ -100,14 +106,15 @@ private struct CoffeePlantCard: View {
                     Text(plant.name)
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(.black)
-                    Text(plant.stage.displayName)
+                    
+                    Text("\(plant.varietal) • \(plant.stage.displayName)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     
                     HStack(spacing: 12) {
                         Label("\(plant.water)%", systemImage: "drop.fill")
                             .font(.caption)
-                        Label("\(plant.light)%", systemImage: "heart.fill")
+                        Label("\(plant.light)%", systemImage: "sun.max.fill")
                             .font(.caption)
                     }
                     .foregroundStyle(.secondary)
@@ -123,12 +130,14 @@ private struct CoffeePlantCard: View {
     }
 }
 
-// Vista para agregar nueva planta
+// MARK: - Vista para agregar nueva planta
+
 private struct AddCoffeePlantView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
     @State private var name: String = ""
+    @State private var selectedVarietal: CoffeeVarietal = .bourbon   // 👈 picker state
     
     var body: some View {
         NavigationStack {
@@ -148,15 +157,27 @@ private struct AddCoffeePlantView: View {
                             .padding(10)
                             .background(Color.ka_bg)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                        
+                        // 👇 Picker de tipo de café
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Tipo de café")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            
+                            Picker("Tipo de café", selection: $selectedVarietal) {
+                                ForEach(CoffeeVarietal.allCases) { varietal in
+                                    Text(varietal.rawValue)
+                                        .tag(varietal)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
                 
                 Button {
-                    guard !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                    let plant = CoffeePlant(name: name.trimmingCharacters(in: .whitespaces))
-                    modelContext.insert(plant)
-                    dismiss()
+                    createPlant()
                 } label: {
                     Text("Crear planta")
                         .font(.system(size: 16, weight: .bold))
@@ -180,6 +201,25 @@ private struct AddCoffeePlantView: View {
                 }
             }
         }
+    }
+    
+    private func createPlant() {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return }
+        
+        let plant = CoffeePlant(
+            name: trimmedName,
+            varietal: selectedVarietal.rawValue, // 👈 guardas el tipo elegido
+            // el resto usa defaults de tu init (stage, water, light, etc.)
+            stage: .seed,
+            stageStartedAt: .now,
+            water: 50,
+            light: 30
+        )
+        
+        modelContext.insert(plant)
+        try? modelContext.save()
+        dismiss()
     }
 }
 

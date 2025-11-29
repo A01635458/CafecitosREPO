@@ -1,8 +1,6 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Detail View
-
 struct CoffeePlantDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -13,109 +11,145 @@ struct CoffeePlantDetailView: View {
     @State private var showRenameSheet = false
     @State private var newName: String = ""
     
+    @State private var showNutrientSheet = false
+    @State private var nutrientFeedback: String?
+    
+    private var shouldShowNutrientsButton: Bool {
+        switch plant.stage {
+        case
+             .seed,
+             .germination,
+             .seedling,
+             .juvenile,
+             .transplanted,
+             .vegetative,
+             .flowering,
+             .greenCherry,
+             .ripeCherry:
+            return true
+        default:
+            return false
+        }
+    }
+    
     var body: some View {
-        VStack(spacing: 24) {
-            // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(plant.name)
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundStyle(.black)
-                    
-                    Text("Estado actual: \(plant.stage.displayName)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 24)
-            
-            // Card principal de planta
-            Card {
-                VStack(spacing: 16) {
-                    Circle()
-                        .fill(Color(red: 0.93, green: 0.86, blue: 0.74))
-                        .frame(width: 120, height: 120)
-                        .overlay(
-                            Image(systemName: "leaf.fill")
-                                .font(.system(size: 50))
-                                .foregroundStyle(Color.ka_coffee)
-                        )
-                    
-                    Text(plant.stage.displayName)
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                    
-                    // Progreso de la etapa actual (tiempo)
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Progreso de la etapa")
+        ScrollView {
+            VStack(spacing: 24) {
+                // Header
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(plant.name)
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundStyle(.black)
+                        
+                        Text("Estado actual: \(plant.stage.displayName)")
                             .font(.subheadline)
-                        ProgressView(value: plant.stageProgress)
+                            .foregroundStyle(.secondary)
                     }
-                    .padding(.top, 4)
                     
-                    // Estado de riego y luz
-                    VStack(alignment: .leading, spacing: 12) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Riego: \(plant.water)% (\(waterDescription(plant.water)))")
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                
+                // Card principal de planta
+                Card {
+                    VStack(spacing: 16) {
+                        Circle()
+                            .fill(Color(red: 0.93, green: 0.86, blue: 0.74))
+                            .frame(width: 120, height: 120)
+                            .overlay(
+                                Image(systemName: "leaf.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundStyle(Color.ka_coffee)
+                            )
+                        
+                        Text(plant.stage.displayName)
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                        
+                        // Progreso de la etapa actual (si lo quieres dejar por ahora)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Progreso de la etapa")
                                 .font(.subheadline)
-                            ProgressView(value: Double(plant.water), total: 100)
+                            ProgressView(value: plant.stageProgress)
+                        }
+                        .padding(.top, 4)
+                        
+                        // Estado de riego y luz
+                        VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Riego: \(plant.water)% (\(waterDescription(plant.water)))")
+                                    .font(.subheadline)
+                                ProgressView(value: Double(plant.water), total: 100)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Luz: \(plant.light)% (\(lightDescription(plant.light)))")
+                                    .font(.subheadline)
+                                ProgressView(value: Double(plant.light), total: 100)
+                            }
+                        }
+                        .padding(.top, 8)
+                        
+                        // Indicador de si cumple requisitos
+                        if plant.environmentRequirementsMet {
+                            Text("✅ La planta está saludable")
+                                .font(.footnote)
+                                .foregroundStyle(.green)
+                        } else {
+                            Text("⚠️ Algo anda mal...")
+                                .font(.footnote)
+                                .foregroundStyle(.orange)
                         }
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Luz: \(plant.light)% (\(lightDescription(plant.light)))")
-                                .font(.subheadline)
-                            ProgressView(value: Double(plant.light), total: 100)
+                        // Calificación de taza solo en etapa .cup
+                        if plant.stage == .cup {
+                            VStack(spacing: 4) {
+                                Text("Calificación SCA: \(plant.finalCupScore)/100")
+                                    .font(.headline)
+                                Text(plant.finalCupGrade)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.top, 8)
                         }
                     }
-                    .padding(.top, 8)
-                    
-                    // Indicador de si cumple requisitos para avanzar
-                    if plant.environmentRequirementsMet {
-                        Text("✅ Requisitos de riego y luz cumplidos")
-                            .font(.footnote)
-                            .foregroundStyle(.green)
-                    } else {
-                        Text("⚠️ Ajusta riego o luz para poder avanzar")
-                            .font(.footnote)
-                            .foregroundStyle(.orange)
-                    }
+                    .padding(16)
                 }
-                .padding(16)
             }
             .padding(.horizontal, 20)
             
             // Botones de acción principales
-            HStack(spacing: 12) {
-                // Restar agua
-                Button {
-                    removeWater()
-                } label: {
-                    Label("Quitar agua", systemImage: "drop.triangle.fill")
-                        .font(.system(size: 14, weight: .bold))
-                        .padding(.vertical, 10)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.ka_coffee)
-                        .foregroundStyle(.white)
+            VStack(spacing: 10) {
+                // Fila 1: regar / quitar
+                HStack(spacing: 12) {
+                    Button {
+                        removeWater()
+                    } label: {
+                        Label("Quitar Agua", systemImage: "drop.triangle.fill")
+                            .font(.system(size: 14, weight: .bold))
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.ka_coffee)
+                            .foregroundStyle(Color.ka_surface)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    
+                    Button {
+                        water()
+                    } label: {
+                        Label("Regar", systemImage: "drop.fill")
+                            .font(.system(size: 14, weight: .bold))
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.ka_coffee)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
                 }
-
-                // Sumar agua
-                Button {
-                    water()
-                } label: {
-                    Label("Regar", systemImage: "drop.fill")
-                        .font(.system(size: 14, weight: .bold))
-                        .padding(.vertical, 10)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.ka_coffee)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-
-                // Luz
+                
+                // Fila 2: sombra / luz
                 Button {
                     cycleLight()
                 } label: {
@@ -129,25 +163,52 @@ struct CoffeePlantDetailView: View {
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(Color.ka_coffee.opacity(0.25), lineWidth: 1)
                         )
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                
+                // Fila 3: nutrientes
+                Button {
+                    showNutrientSheet = true
+                } label: {
+                    Label("Nutrientes", systemImage: "leaf.circle.fill")
+                        .font(.system(size: 14, weight: .bold))
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.ka_surface)
+                        .foregroundStyle(Color.ka_coffee)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.ka_coffee.opacity(0.25), lineWidth: 1)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
             .padding(.horizontal, 20)
 
-
+            .padding(.horizontal, 20)
             
-            // Botón para intentar avanzar de estado (usa la lógica de requisitos)
+            // Feedback de nutrientes (se limpia al avanzar de etapa)
+            if let feedback = nutrientFeedback {
+                Text(feedback)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            
+            // Botón para intentar avanzar de estado
             Button {
                 advanceStage()
             } label: {
-                Label("Actualizar/avanzar estado", systemImage: "arrow.right.circle.fill")
+                Label("Avanzar la fase", systemImage: "arrow.right.circle.fill")
                     .font(.system(size: 16, weight: .bold))
                     .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
-                    .background(Color.ka_surface)
-                    .foregroundStyle(Color.ka_coffee)
+                    .background(Color.ka_coffee)
+                    .foregroundStyle(Color.ka_surface)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.ka_coffee.opacity(0.25), lineWidth: 1)
+                            .stroke(Color.ka_surface.opacity(0.25), lineWidth: 1)
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
@@ -157,11 +218,9 @@ struct CoffeePlantDetailView: View {
         }
         .background(Color.ka_bg.ignoresSafeArea())
         .onAppear {
-            // Al abrir, intentamos actualizar la etapa según el tiempo y requisitos
-            plant.updateStageIfNeeded()
+            nutrientFeedback = nil
             try? modelContext.save()
         }
-        // MARK: - Toolbar con menú (...)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
@@ -179,7 +238,6 @@ struct CoffeePlantDetailView: View {
                 }
             }
         }
-        // MARK: - Alert eliminar planta
         .alert("¿Eliminar planta?", isPresented: $showDeleteAlert) {
             Button("Cancelar", role: .cancel) {}
             Button("Eliminar", role: .destructive) {
@@ -188,7 +246,6 @@ struct CoffeePlantDetailView: View {
         } message: {
             Text("Esta acción no se puede deshacer.")
         }
-        // MARK: - Sheet cambiar nombre
         .sheet(isPresented: $showRenameSheet) {
             NavigationStack {
                 VStack(spacing: 20) {
@@ -229,12 +286,27 @@ struct CoffeePlantDetailView: View {
                 }
             }
         }
+        
+        .confirmationDialog(
+            "Elige un paquete de nutrientes",
+            isPresented: $showNutrientSheet
+        ) {
+            Button("Paquete chico") {
+                applyNutrientPackage(.small)
+            }
+            Button("Paquete mediano") {
+                applyNutrientPackage(.medium)
+            }
+            Button("Paquete grande") {
+                applyNutrientPackage(.large)
+            }
+            Button("Cancelar", role: .cancel) {}
+        }
     }
     
     // MARK: - Actions
     
     private func water() {
-        // Usa el método del modelo para sumar agua
         plant.waterPlant(amount: 10)
         try? modelContext.save()
     }
@@ -245,9 +317,7 @@ struct CoffeePlantDetailView: View {
         try? modelContext.save()
     }
 
-    
     private func cycleLight() {
-        // Ciclo simple: sombra -> parcial -> sol -> sombra, usando valores de 0–100
         let current = plant.light
         
         let nextValue: Int
@@ -266,6 +336,7 @@ struct CoffeePlantDetailView: View {
     
     private func advanceStage() {
         plant.updateStageIfNeeded()
+        nutrientFeedback = nil
         try? modelContext.save()
     }
     
@@ -274,6 +345,17 @@ struct CoffeePlantDetailView: View {
         dismiss()
     }
     
+    private func applyNutrientPackage(_ package: NutrientPackage) {
+        let correct = plant.applyNutrients(package)
+        try? modelContext.save()
+        
+        if correct {
+            nutrientFeedback = "✅ Elegiste el paquete correcto para esta etapa."
+        } else {
+            nutrientFeedback = "⚠️ Este paquete no es ideal en esta etapa."
+        }
+    }
+
     // MARK: - Descripciones amigables
     
     private func waterDescription(_ value: Int) -> String {
