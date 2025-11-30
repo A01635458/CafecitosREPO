@@ -10,9 +10,16 @@ struct CoffeePlantDetailView: View {
     @State private var showDeleteAlert = false
     @State private var showRenameSheet = false
     @State private var newName: String = ""
-    
+    @State private var showTips = false
     @State private var showNutrientSheet = false
     @State private var nutrientFeedback: String?
+    @State private var showWaterFX = false
+    @State private var showHarvestFX = false
+    
+    var isBouncing: Bool {
+        showWaterFX || showHarvestFX
+    }
+
     
     private var shouldShowNutrientsButton: Bool {
         switch plant.stage {
@@ -35,90 +42,117 @@ struct CoffeePlantDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(plant.name)
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundStyle(.black)
-                        
-                        Text("Estado actual: \(plant.stage.displayName)")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
-                
+ 
                 // Card principal de planta
                 Card {
-                    VStack(spacing: 16) {
-                        Circle()
-                            .fill(Color(red: 0.93, green: 0.86, blue: 0.74))
-                            .frame(width: 120, height: 120)
-                            .overlay(
-                                Image(systemName: "leaf.fill")
-                                    .font(.system(size: 50))
-                                    .foregroundStyle(Color.ka_coffee)
-                            )
-                        
-                        Text(plant.stage.displayName)
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                        
-                        // Progreso de la etapa actual (si lo quieres dejar por ahora)
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Progreso de la etapa")
-                                .font(.subheadline)
-                            ProgressView(value: plant.stageProgress)
-                        }
-                        .padding(.top, 4)
-                        
-                        // Estado de riego y luz
-                        VStack(alignment: .leading, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Riego: \(plant.water)% (\(waterDescription(plant.water)))")
-                                    .font(.subheadline)
-                                ProgressView(value: Double(plant.water), total: 100)
+                    ZStack(alignment: .topTrailing) {
+                        lightBackgroundColor(for: plant.light)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                        VStack(spacing: 16) {
+                            Spacer()
+                                .frame(height: 10)
+                            ZStack {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(red: 0.93, green: 0.86, blue: 0.74))
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.ka_coffee, lineWidth: 4)
+                                        )
+                                        .overlay(
+                                            Image(systemName: "leaf.fill")
+                                                .font(.system(size: 50))
+                                                .foregroundStyle(Color.ka_coffee)
+                                        )
+                                        .scaleEffect(isBouncing ? 1.05 : 1.0)
+                                        .animation(.spring(response: 0.25,
+                                                           dampingFraction: 0.6),
+                                                   value: isBouncing)
+
+                                    Image(systemName: "drop.fill")
+                                        .font(.system(size: 28))
+                                        .foregroundStyle(Color.ka_coffee)
+                                        .offset(y: -95)
+                                        .opacity(showWaterFX ? 1 : 0)
+                                        .animation(.easeOut(duration: 0.25), value: showWaterFX)
+                                }
+                                .frame(width: 140, height: 140)
                             }
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Luz: \(plant.light)% (\(lightDescription(plant.light)))")
-                                    .font(.subheadline)
-                                ProgressView(value: Double(plant.light), total: 100)
+                            .contentShape(Rectangle())
+                            .onTapGesture{
+                                
                             }
-                        }
-                        .padding(.top, 8)
-                        
-                        // Indicador de si cumple requisitos
-                        if plant.environmentRequirementsMet {
-                            Text("✅ La planta está saludable")
-                                .font(.footnote)
-                                .foregroundStyle(.green)
-                        } else {
-                            Text("⚠️ Algo anda mal...")
-                                .font(.footnote)
-                                .foregroundStyle(.orange)
-                        }
-                        
-                        // Calificación de taza solo en etapa .cup
-                        if plant.stage == .cup {
-                            VStack(spacing: 4) {
-                                Text("Calificación SCA: \(plant.finalCupScore)/100")
+
+                            Text(plant.stage.displayName)
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Tiempo en la etapa")
+                                    .font(.subheadline)
+                                Text(plant.stageTime)
                                     .font(.headline)
-                                Text(plant.finalCupGrade)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, 4)
+
+                            // Estado de riego y luz
+                            VStack(alignment: .leading, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Riego: \(plant.water)% (\(waterDescription(plant.water)))")
+                                        .font(.subheadline)
+                                    ProgressView(value: Double(plant.water), total: 100)
+                                }
+
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Luz: \(plant.light)% (\(lightDescription(plant.light)))")
+                                        .font(.subheadline)
+                                    ProgressView(value: Double(plant.light), total: 100)
+                                }
                             }
                             .padding(.top, 8)
+
+                            // Indicador si cumple requisitos
+                            if plant.environmentRequirementsMet {
+                                Text("✅ La planta está saludable")
+                                    .font(.footnote)
+                                    .foregroundStyle(.green)
+                            } else {
+                                Text("⚠️ Algo anda mal...")
+                                    .font(.footnote)
+                                    .foregroundStyle(.orange)
+                            }
+
+                            // Calificación final de taza
+                            if plant.stage == .cup {
+                                VStack(spacing: 4) {
+                                    Text("Calificación SCA: \(plant.finalCupScore)/100")
+                                        .font(.headline)
+                                    Text(plant.finalCupGrade)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.top, 8)
+                            }
+                        }
+                        .padding(16)
+
+                        // Botón (i)
+                        Button {
+                            showTips = true
+                        } label: {
+                            Image(systemName: "info.circle.fill")
+                                .font(.system(size: 28, weight: .semibold))
+                                .foregroundStyle(Color.ka_coffee)
+                                .padding(8)
                         }
                     }
-                    .padding(16)
                 }
+
             }
+            .animation(.easeInOut(duration: 0.4), value: plant.light)
             .padding(.horizontal, 20)
+            
             
             // Botones de acción principales
             VStack(spacing: 10) {
@@ -238,6 +272,12 @@ struct CoffeePlantDetailView: View {
                 }
             }
         }
+        .alert("Consejos para \(plant.stage.displayName)",
+               isPresented: $showTips) {
+            Button("Cerrar", role: .cancel) {}
+        } message: {
+            Text(StageTips.tip(for: plant.stage, varietal: plant.varietalType))
+        }
         .alert("¿Eliminar planta?", isPresented: $showDeleteAlert) {
             Button("Cancelar", role: .cancel) {}
             Button("Eliminar", role: .destructive) {
@@ -309,6 +349,13 @@ struct CoffeePlantDetailView: View {
     private func water() {
         plant.waterPlant(amount: 10)
         try? modelContext.save()
+      
+        showWaterFX = true
+    
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            showWaterFX = false
+            
+        }
     }
     
     private func removeWater() {
@@ -322,12 +369,12 @@ struct CoffeePlantDetailView: View {
         
         let nextValue: Int
         switch current {
-        case 0..<40:
-            nextValue = 55   // sombra parcial
-        case 40..<75:
-            nextValue = 85   // sol fuerte
+        case ..<50:
+            nextValue = 66   // sombra parcial
+        case 50..<80:
+            nextValue = 100   // sol fuerte
         default:
-            nextValue = 25   // sombra
+            nextValue = 33   // sombra
         }
         
         plant.changeLight(to: nextValue)
@@ -355,6 +402,18 @@ struct CoffeePlantDetailView: View {
             nutrientFeedback = "⚠️ Este paquete no es ideal en esta etapa."
         }
     }
+    
+    func lightBackgroundColor(for light: Int) -> Color {
+        switch light {
+        case ..<50:
+            return Color(red: 0.83, green: 0.78, blue: 0.72) // sombra
+        case 50..<80:
+            return Color(red: 0.90, green: 0.85, blue: 0.78) // sombra parcial
+        default:
+            return Color(red: 0.97, green: 0.92, blue: 0.80) // sol directo
+        }
+    }
+
 
     // MARK: - Descripciones amigables
     
