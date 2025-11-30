@@ -17,6 +17,8 @@ struct CoffeePlantDetailView: View {
     @State private var showHarvestFX = false
     @State private var bounceScale: CGFloat = 1.0
     @State private var cherries: [FlyingCherry] = []
+    @State private var harvestTapCount = 0
+    @State private var showBenefitSheet = false
     
     var isBouncing: Bool {
         showWaterFX || showHarvestFX
@@ -74,6 +76,71 @@ struct CoffeePlantDetailView: View {
         } message: {
             Text("Esta acción no se puede deshacer.")
         }
+        .sheet(isPresented: $showBenefitSheet) {
+            VStack(spacing: 16) {
+                Capsule()
+                    .fill(Color.secondary.opacity(0.3))
+                    .frame(width: 40, height: 4)
+                    .padding(.top, 8)
+                
+                Text("Elige el tipo de beneficio")
+                    .font(.headline)
+                    .padding(.top, 4)
+                
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.ka_surface)
+                    .frame(height: 120)
+                    .overlay(
+                        VStack(spacing: 4) {
+                            Text(plant.name)
+                                .font(.subheadline).bold()
+                            Text("Varietal: \(plant.varietal)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text("Fase: Cosecha")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding()
+                    )
+                    .padding(.horizontal, 20)
+                
+                // Botones de tipo de beneficio
+                HStack(spacing: 12) {
+                    benefitOptionButton(
+                        title: "Honey",
+                        subtitle: "Más dulzor",
+                        color: Color.orange.opacity(0.15)
+                    ) {
+                        selectBenefit(.honey)
+                    }
+                    
+                    benefitOptionButton(
+                        title: "Lavado",
+                        subtitle: "Más claridad",
+                        color: Color.blue.opacity(0.15)
+                    ) {
+                        selectBenefit(.washed)
+                    }
+                    
+                    benefitOptionButton(
+                        title: "Natural",
+                        subtitle: "Frutal intenso",
+                        color: Color.pink.opacity(0.15)
+                    ) {
+                        selectBenefit(.natural)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 12)
+                
+                Spacer(minLength: 0)
+            }
+            .presentationDetents([.fraction(0.45)])      // 👈 se ve como bottom sheet
+            .presentationDragIndicator(.visible)
+            .background(Color.ka_bg.ignoresSafeArea())
+        }
+
         .sheet(isPresented: $showRenameSheet) { renameSheet }
         .confirmationDialog(
             "Elige un paquete de nutrientes",
@@ -123,9 +190,11 @@ private extension CoffeePlantDetailView {
                         }
                         
                         ForEach(cherries) { cherry in
-                            Image(systemName: "circle.fill")
-                                .foregroundStyle(Color.red)
-                                .frame(width: 14, height: 14)
+                            Image("Cherry")
+                                .resizable()
+                                .renderingMode(.original)
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
                                 .scaleEffect(cherry.scale)
                                 .rotationEffect(.degrees(cherry.rotation))
                                 .offset(x: cherry.x, y: cherry.y)
@@ -142,7 +211,7 @@ private extension CoffeePlantDetailView {
                     
                     Text(plant.stage.displayName)
                         .font(.headline)
-                        .foregroundStyle(.secondary)
+                        
                     
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Tiempo en la etapa")
@@ -212,11 +281,33 @@ private extension CoffeePlantDetailView {
     var actionsSection: some View {
         Group {
             if plant.stage == .harvest {
-                Text("Presiona la planta para cosechar")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
+                VStack(spacing: 10) {
+                    if harvestTapCount < 5 {
+                        Text("Presiona la planta para cosechar (\(harvestTapCount)/5)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text("¡Cosecha lista! Ahora elige el tipo de beneficio.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.bottom, 4)
+                        
+                        Button {
+                            showBenefitSheet = true
+                        } label: {
+                            Label("Elegir tipo de beneficio", systemImage: "arrow.right.circle.fill")
+                                .font(.system(size: 16, weight: .bold))
+                                .padding(.vertical, 10)
+                                .frame(maxWidth: .infinity)
+                                .background(Color.ka_coffee)
+                                .foregroundStyle(Color.ka_surface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
             } else {
                 VStack(spacing: 10) {
                     // Fila 1: regar / quitar
@@ -427,6 +518,24 @@ private extension CoffeePlantDetailView {
         dismiss()
     }
     
+    private func benefitOptionButton(
+        title: String,
+        subtitle: String,
+        color: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        BenefitOptionButton(title: title, subtitle: subtitle, color: color, action: action)
+    }
+    
+    private func selectBenefit(_ type: BenefitProcess) {
+        plant.benefitProcess = type
+        plant.stage = .processing
+        plant.stageStartedAt = Date()
+        harvestTapCount = 0
+        showBenefitSheet = false
+        try? modelContext.save()
+    }
+    
     private func applyNutrientPackage(_ package: NutrientPackage) {
         let correct = plant.applyNutrients(package)
         try? modelContext.save()
@@ -440,6 +549,7 @@ private extension CoffeePlantDetailView {
     
     private func handlePlantTap() {
         guard plant.stage == .harvest else { return }
+        harvestTapCount += 1
         
         showHarvestFX = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
@@ -485,7 +595,7 @@ private extension CoffeePlantDetailView {
         let id = cherry.id
         cherries.append(cherry)
 
-        let distance = CGFloat.random(in: 120...220)
+        let distance = CGFloat(350)
         let angle = Double.random(in: 0...(2 * .pi))
         
         let targetX = CGFloat(cos(angle)) * distance
@@ -493,16 +603,14 @@ private extension CoffeePlantDetailView {
         
     
         if let index = cherries.firstIndex(where: { $0.id == id }) {
-            withAnimation(.easeOut(duration: 0.8)) {
+            withAnimation(.easeOut(duration: 1.2)) {
                 cherries[index].x = targetX
                 cherries[index].y = targetY
                 cherries[index].scale = 1.0
-                cherries[index].opacity = 0.0
-                cherries[index].rotation = Double.random(in: -40...40)
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
             cherries.removeAll { $0.id == id }
         }
     }
@@ -536,4 +644,32 @@ private struct FlyingCherry: Identifiable {
     var scale: CGFloat = 0.6
     var opacity: Double = 1.0
     var rotation: Double = 0
+}
+
+private struct BenefitOptionButton: View {
+    let title: String
+    let subtitle: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.primary)
+                Text(subtitle)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(color)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.ka_coffee.opacity(0.25), lineWidth: 1)
+            )
+        }
+    }
 }

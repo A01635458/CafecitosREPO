@@ -21,6 +21,7 @@ class CoffeePlant {
     var qualityAccumulated: Double // calidad de la planta acumulada
     var qualitySamples: Int // cuantas etapas han aportado
     var nutrientBonus: Double // nutrientes
+    var benefitProcessRaw: String?
     
     init(
         id: UUID = UUID(),
@@ -156,6 +157,15 @@ struct EnvironmentRules {
 
 extension CoffeePlant {
     
+    var isPostHarvestStage: Bool {
+        switch stage {
+        case .harvest, .processing, .drying, .roasting, .cup:
+            return true
+        default:
+            return false
+        }
+    }
+    
     var stageTime: String {
         let seconds = Date().timeIntervalSince(stageStartedAt)
         
@@ -175,7 +185,7 @@ extension CoffeePlant {
     var varietalType: CoffeeVarietal {
             CoffeeVarietal(rawValue: varietal) ?? .bourbon
         }
-    //  La lógica de "qué tan cerca" está de los rangos (0–1)
+    //  "qué tan cerca" está de los rangos (0–1)
     private func score(value: Int, in range: ClosedRange<Int>) -> Double {
         if range.contains(value) {
             return 1.0
@@ -193,8 +203,14 @@ extension CoffeePlant {
     
     // Score de calidad por etapa según agua + luz (0–1)
     func stageQualityScore() -> Double {
+        // 👉 Para etapas post-cosecha ya no medimos agua/luz
+        if isPostHarvestStage {
+            return 1.0
+        }
+        
         guard let req = EnvironmentRules.requirement(for: stage, varietal: varietalType) else {
-            return 1.0 // si no hay requisitos para esta etapa, cuenta como perfecto
+            // si no hay requisitos configurados, cuenta como perfecto
+            return 1.0
         }
         
         var total = 0.0
@@ -259,6 +275,32 @@ extension CoffeePlant {
         }
     }
     
+    var benefitProcess: BenefitProcess? {
+        get {
+            guard let raw = benefitProcessRaw else { return nil }
+            return BenefitProcess(rawValue: raw)
+        }
+        set {
+            benefitProcessRaw = newValue?.rawValue
+        }
+    }
+    
+    var benefitBonus: Double {
+        switch benefitProcess {
+        case .washed:
+            // taza muy limpia
+            return 0.03
+        case .honey:
+            // mucho dulzor
+            return 0.05
+        case .natural:
+            // frutal intenso
+            return 0.04
+        case nil:
+            return 0.0
+        }
+    }
+    
     var stageProgress: Double {
         let now = Date()
         let elapsed = now.timeIntervalSince(stageStartedAt)
@@ -305,15 +347,20 @@ extension CoffeePlant {
     
     // Score final de taza (0–100)
     var finalCupScore: Int {
-            guard qualitySamples > 0 else {
-                let base = max(0.0, min(1.0, nutrientBonus / 5.0))
-                return Int((base * 100).rounded())
-            }
-            let baseQuality = qualityAccumulated / Double(qualitySamples) // 0–1
-            let combined = baseQuality + (nutrientBonus / 10.0)           // escala bonus
-            let clamped = max(0.0, min(1.0, combined))
+        // Si nunca registraste etapas, usa solo nutrientes + beneficio
+        guard qualitySamples > 0 else {
+            let base = (nutrientBonus / 5.0) + benefitBonus
+            let clamped = max(0.0, min(1.0, base))
             return Int((clamped * 100).rounded())
         }
+        
+        let baseQuality = qualityAccumulated / Double(qualitySamples) // 0–1
+        let combined = baseQuality
+                     + (nutrientBonus / 10.0)
+                     + benefitBonus
+        let clamped = max(0.0, min(1.0, combined))
+        return Int((clamped * 100).rounded())
+    }
     
     // Texto de calificación (opcional)
     var finalCupGrade: String {
@@ -326,4 +373,10 @@ extension CoffeePlant {
         default:       return "Baja calidad"
         }
     }
+}
+
+enum BenefitProcess: String, Codable, CaseIterable {
+    case washed    // lavado
+    case honey     // honey / miel
+    case natural   // natural
 }
