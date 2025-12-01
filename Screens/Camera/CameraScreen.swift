@@ -11,7 +11,7 @@ import CoreML
 import Supabase
 
 struct ScanEntry: Encodable {
-    let user_id: Int
+    let user_id: UUID
     let label: String
     let info: String
     let specialtyimpact: String
@@ -127,7 +127,7 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
     }
     
     func saveScanToSupabase(
-        user_id: Int,
+        user_id: UUID,
         label: String,
         info: String,
         specialtyimpact: String,
@@ -367,13 +367,18 @@ struct CameraScreen: View {
                 break
             }
             
-            camera.saveScanToSupabase(
-                user_id: 1,
-                label: label,
-                info: popupText,
-                specialtyimpact: specialtyImpact,
-                preventiontips: preventionTips
-            )
+            if let user = supabase.auth.currentUser {
+                camera.saveScanToSupabase(
+                    user_id: user.id,
+                    label: label,
+                    info: popupText,
+                    specialtyimpact: specialtyImpact,
+                    preventiontips: preventionTips
+                )
+            }
+            else {
+                print("⚠️ No hay usuario autenticado")
+            }
         }
     }
 }
