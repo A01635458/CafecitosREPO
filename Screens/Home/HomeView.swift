@@ -161,16 +161,68 @@
 
 import SwiftUI
 
+struct HomeModuleLinkDTO: Identifiable {
+    let id = UUID()
+    let title: String
+    let progress: Double
+    let lessonID: UUID
+}
+
+private struct ModuleRow: View {
+    let title: String
+    let progress: Double
+    @State private var animatedProgress: Double = 0.0
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.black)
+                Spacer()
+                Text("\(Int(animatedProgress * 100))%")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+            }
+            ProgressView(value: animatedProgress)
+                .tint(Color("ka_coffee"))
+                .animation(.easeOut(duration: 1.0), value: animatedProgress)
+        }
+        .padding()
+        .background(Color("ka_surface"))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.2)) {
+                animatedProgress = progress
+            }
+        }
+    }
+}
+
+// Vista de destino simulada (debe estar en su propio archivo si se usa extensamente)
+struct LessonContentView: View {
+    var body: some View {
+        Text("Aquí iría la vista de Lectura de la Lección").navigationTitle("Contenido")
+    }
+}
+
 struct HomeView: View {
     @Binding var selectedTab: Int
-    @State private var animatedProgress: Double = 0.0
-
+    @State private var animatedTotalProgress: Double = 0.0
+    
+    let modulesData: [HomeModuleLinkDTO] = [
+        .init(title: "La planta del café", progress: 0.9, lessonID: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!),
+        .init(title: "Del cacao a la especialidad", progress: 0.45, lessonID: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!),
+        .init(title: "Tueste y aroma", progress: 0.2, lessonID: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!),
+        .init(title: "Cata y especialidades", progress: 0.6, lessonID: UUID(uuidString: "00000000-0000-0000-0000-000000000004")!)
+    ]
+    
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 28) {
                     
-                    // MARK: - Encabezado de progreso general
                     VStack(alignment: .leading, spacing: 14) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
@@ -180,14 +232,13 @@ struct HomeView: View {
                                 Text("Aquí está tu progreso actual")
                                     .font(.system(size: 14))
                                     .foregroundStyle(.secondary)
-                                    .foregroundStyle(.black)
                             }
                             Spacer()
                             AsyncImage(url: URL(string: "https://images.pexels.com/photos/1695052/pexels-photo-1695052.jpeg")) { img in
                                 img.resizable().scaledToFill()
                             } placeholder: { Color.gray.opacity(0.2) }
-                                .frame(width: 55, height: 55)
-                                .clipShape(Circle())
+                            .frame(width: 55, height: 55)
+                            .clipShape(Circle())
                         }
                         
                         VStack(alignment: .leading, spacing: 6) {
@@ -196,20 +247,18 @@ struct HomeView: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundStyle(.black)
                                 Spacer()
-                                Text("\(Int(animatedProgress * 100))%")
+                                Text("\(Int(animatedTotalProgress * 100))%")
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundStyle(.secondary)
-                                    .foregroundStyle(.black)
                             }
-                            ProgressView(value: animatedProgress)
-                                .tint(.ka_coffee)
-                                .animation(.easeOut(duration: 1.0), value: animatedProgress)
+                            ProgressView(value: animatedTotalProgress)
+                                .tint(Color("ka_coffee"))
+                                .animation(.easeOut(duration: 1.0), value: animatedTotalProgress)
                         }
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 40)
                     
-                    // MARK: - Fun Fact del Día
                     VStack(alignment: .leading, spacing: 12) {
                         Text(" Fun Fact del Día")
                             .font(.system(size: 18, weight: .semibold))
@@ -217,15 +266,13 @@ struct HomeView: View {
                         Text("¿Sabías que el café fue descubierto por un pastor etíope llamado Kaldi, que notó que sus cabras se volvían más activas después de comer frutos de café?")
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
-                            .foregroundStyle(.black)
                     }
                     .padding(20)
-                    .background(Color.ka_surface)
+                    .background(Color("ka_surface"))
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
                     .padding(.horizontal, 20)
                     
-                    // MARK: - Próxima lección recomendada
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Siguiente lección recomendada")
                             .font(.system(size: 20, weight: .bold))
@@ -254,10 +301,10 @@ struct HomeView: View {
                                 .padding(20)
                             }
                         }
+                        .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal, 20)
                     }
                     
-                    // MARK: - Resumen de progreso por módulos
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Resumen de tus módulos")
                             .font(.system(size: 20, weight: .bold))
@@ -265,66 +312,28 @@ struct HomeView: View {
                             .foregroundStyle(.black)
                         
                         VStack(spacing: 14) {
-                            ModuleRow(title: "La planta del café", progress: 0.9)
-                                .foregroundStyle(.black)
-                            ModuleRow(title: " Del cacao a la especialidad", progress: 0.45)
-                                .foregroundStyle(.black)
-                            ModuleRow(title: " Tueste y aroma", progress: 0.2)
-                                .foregroundStyle(.black)
-                            ModuleRow(title: "Cata y especialidades", progress: 0.6)
-                                .foregroundStyle(.black)
+                            ForEach(modulesData) { module in
+                                
+                                NavigationLink(destination: LessonContentView()) {
+                                    ModuleRow(title: module.title, progress: module.progress)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
                         }
                         .padding(.horizontal, 20)
                     }
                 }
             }
-            .background(Color.ka_bg.ignoresSafeArea())
+            .background(Color("ka_bg").ignoresSafeArea())
             .navigationTitle("")
             .navigationBarHidden(true)
             .onAppear {
-                // Animación de carga de progreso
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     withAnimation(.easeOut(duration: 1.2)) {
-                        animatedProgress = 0.65
+                        animatedTotalProgress = 0.65
                     }
                 }
             }
         }
     }
-}
-
-// MARK: - Componente de módulo
-private struct ModuleRow: View {
-    let title: String
-    let progress: Double
-    @State private var animatedProgress: Double = 0.0
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                Spacer()
-                Text("\(Int(animatedProgress * 100))%")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
-            }
-            ProgressView(value: animatedProgress)
-                .tint(.ka_coffee)
-                .animation(.easeOut(duration: 1.0), value: animatedProgress)
-        }
-        .padding()
-        .background(Color.ka_surface)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
-        .onAppear {
-            withAnimation(.easeOut(duration: 1.2)) {
-                animatedProgress = progress
-            }
-        }
-    }
-}
-
-#Preview {
-    HomeView(selectedTab: .constant(1))
 }
