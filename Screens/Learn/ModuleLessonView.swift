@@ -6,9 +6,7 @@
 //
 
 import SwiftUI
-
 // MARK: - Vistas Auxiliares de Lecciones
-
 struct LessonDetailView: View {
     let lesson: LessonDTO
     @StateObject private var apiService = CafecitosAPIService.shared
@@ -16,7 +14,7 @@ struct LessonDetailView: View {
     
     init(lesson: LessonDTO) {
         self.lesson = lesson
-        _isActive = State(initialValue: lesson.is_active)
+        _isActive = State(initialValue: lesson.is_active ?? false)
     }
     
     var body: some View {
@@ -62,14 +60,13 @@ struct LessonDetailView: View {
         .navigationTitle(lesson.title).navigationBarTitleDisplayMode(.inline)
     }
 }
-
 struct LessonRow: View {
     let lesson: LessonDTO
     
     var body: some View {
         HStack {
-            Image(systemName: lesson.is_active ? "book.fill" : "lock.circle.fill")
-                .foregroundColor(lesson.is_active ? .blue : .gray)
+            Image(systemName: (lesson.is_active ?? false) ? "book.fill" : "lock.circle.fill")
+                .foregroundColor((lesson.is_active ?? false) ? .blue : .gray)
             
             Text(lesson.title).font(.system(size: 16))
             
@@ -83,7 +80,6 @@ struct LessonRow: View {
         }.padding(.vertical, 8)
     }
 }
-
 struct EditLessonSheet: View {
     @Binding var isPresented: Bool
     @State var currentLesson: LessonDTO
@@ -108,12 +104,16 @@ struct EditLessonSheet: View {
                     TextField("URL de Video (Enlace Externo)", text: $currentLesson.url_link.bound)
                 }
                 Section("Estado") {
-                    Toggle("Lección Activa", isOn: $currentLesson.is_active)
-                        .onChange(of: currentLesson.is_active) { newValue in
-                            Task {
-                                _ = await apiService.updateLessonStatus(lessonID: currentLesson.id, isActive: newValue)
-                            }
+                    // Corrección del error 'isNotNil' usando Binding(get:set:)
+                    Toggle("Lección Activa", isOn: Binding(
+                        get: { self.currentLesson.is_active ?? false },
+                        set: { self.currentLesson.is_active = $0 }
+                    ))
+                    .onChange(of: currentLesson.is_active) { newValue in
+                        Task {
+                            _ = await apiService.updateLessonStatus(lessonID: currentLesson.id, isActive: newValue ?? false)
                         }
+                    }
                 }
             }
             .navigationTitle("Editar Lección").navigationBarTitleDisplayMode(.inline)
@@ -129,10 +129,7 @@ struct EditLessonSheet: View {
         }
     }
 }
-
-
 // MARK: - ModuleLessonView (Detalle de Módulo / CRUD de Lecciones)
-
 struct ModuleLessonView: View {
     let module: ModuleDTO
     @ObservedObject var apiService: CafecitosAPIService
@@ -222,7 +219,6 @@ struct ModuleLessonView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 30)
-
             }
         }
         .onAppear {
@@ -243,7 +239,9 @@ struct ModuleLessonView: View {
                         )
                         
                         if result == nil {
-                            newLessonError = apiService.errorMessage ?? "Error desconocido al crear la lección."
+                            // Si falla la decodificación, recarga para actualizar la UI
+                            await apiService.fetchLessons()
+                            newLessonError = apiService.errorMessage ?? "Error de formato. Se recarga el listado."
                         }
                     }
                 }
@@ -263,4 +261,3 @@ struct ModuleLessonView: View {
         .navigationTitle(module.title)
     }
 }
-

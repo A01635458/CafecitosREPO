@@ -44,4 +44,3 @@ extension Binding where Value == LessonDTO? {
         )
     }
 }
-
