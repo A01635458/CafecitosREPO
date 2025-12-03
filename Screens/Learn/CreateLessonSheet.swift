@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-
 struct CreateLessonSheet: View {
     @Binding var isPresented: Bool
     let moduleID: UUID
@@ -14,7 +13,7 @@ struct CreateLessonSheet: View {
     
     @State private var title: String = ""
     @State private var content: String = ""
-    @State private var urlLink: String = "" 
+    @State private var urlLink: String = ""
     
     var body: some View {
         NavigationStack {
@@ -24,10 +23,8 @@ struct CreateLessonSheet: View {
                 }
                 
                 Section("Contenido de la Lección") {
-                    
                     TextField("Contenido de texto (Opcional)", text: $content, axis: .vertical)
                         .lineLimit(5...10)
-                    
                     TextField("URL de Video (Opcional)", text: $urlLink)
                 }
             }
@@ -48,4 +45,3 @@ struct CreateLessonSheet: View {
         }
     }
 }
-

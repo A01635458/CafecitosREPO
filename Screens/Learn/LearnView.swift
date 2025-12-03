@@ -1,7 +1,5 @@
 import SwiftUI
-
 // MARK: - Vistas Auxiliares de Módulos
-
 struct APIModuleCard: View {
     let module: ModuleDTO
     
@@ -34,7 +32,6 @@ struct APIModuleCard: View {
         .padding(.horizontal, 20).padding(.top, 8)
     }
 }
-
 struct CreateModuleSheet: View {
     @Binding var isPresented: Bool
     @Binding var title: String
@@ -67,7 +64,6 @@ struct CreateModuleSheet: View {
         }
     }
 }
-
 struct EditModuleSheet: View {
     @Binding var isPresented: Bool
     @State var currentModule: ModuleDTO
@@ -115,9 +111,7 @@ struct EditModuleSheet: View {
         }
     }
 }
-
 // MARK: - LearnView (Vista Principal / CRUD de Módulos)
-
 struct LearnView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var apiService = CafecitosAPIService.shared

@@ -13,35 +13,34 @@ struct CacaoLessonView: View {
             VStack(spacing: 35) {
                 LessonHeaderView(
                     imageURL: "https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg",
-                    title: "Del cacao a la especialidad",
-                    subtitle: "Fermentación, secado y perfiles de sabor",
+                    title: "El Viaje del Café de Especialidad",
+                    subtitle: "Fermentación, Tueste y el Perfil de Taza",
                     isFavorite: $isFavorite
                 )
                 
                 LessonTextBlock(
-                    title: "Procesos del grano",
+                    title: "Procesos Húmedos y Secos del Grano",
                     text: """
-                    La fermentación es esencial para el desarrollo del sabor y aroma en el café de especialidad. 
-                    La duración y temperatura influyen directamente en el dulzor y la acidez.
+                    La fermentación es clave para el sabor del café, ¡no solo para el vino! En los procesos naturales secos, el grano se seca dentro de la cereza, dándole sabores más frutales. En los lavados húmedos, se quita la cereza antes de secar, resultando en sabores más limpios y ácidos.
                     """
                 )
 
                 LargeWidgetCard(
                     imageURL: "https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg",
-                    title: "Fermentación controlada",
-                    description: "Un secado lento y constante asegura que los granos mantengan su estructura y no desarrollen sabores amargos."
+                    title: "El Tueste: De Verde a Marrón",
+                    description: "El tueste es lo que libera los aromas. Un tueste ligero mantiene la acidez y las notas frutales, mientras que un tueste oscuro desarrolla sabores a chocolate y nueces, con menos acidez. Es un balance delicado para el sabor final."
                 )
 
-                FunFactGlassCard(text: "Un secado demasiado rápido puede provocar sabores desequilibrados y pérdida de aroma en el café final.")
+                FunFactGlassCard(text: "Un café se considera de 'especialidad' si obtiene 80 puntos o más en una escala de 100 por catadores expertos. ¡Es un estándar de calidad global!")
                 
                 QuizWidget(
-                    question: "¿Qué etapa define el perfil aromático del café?",
-                    options: ["Fermentación", "Tueste", "Molido"],
-                    correctAnswer: 0
+                    question: "¿Qué proceso de café tiende a dar sabores más intensos y frutales?",
+                    options: ["Lavado Húmedo", "Tueste Oscuro", "Natural Seco"],
+                    correctAnswer: 2
                 )
                 
                 LessonCameraSection(
-                    instruction: "Fotografía un grano en proceso de fermentación para observar sus cambios de color y textura.",
+                    instruction: "Aprende a diferenciar! Fotografía tres granos de café: uno sin tostar verde, uno de tueste claro y uno de tueste oscuro.",
                     showCamera: $showCamera
                 )
 

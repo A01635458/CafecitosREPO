@@ -8,9 +8,7 @@
 import Foundation
 import Supabase
 import Combine
-
 // MARK: - DTOs de Módulos
-
 struct ModuleDTO: Codable, Identifiable, Hashable {
     let id: UUID
     var title: String
@@ -20,7 +18,6 @@ struct ModuleDTO: Codable, Identifiable, Hashable {
     var sort_order: Int
     let created_at: Date?
 }
-
 struct CreateModuleDTO: Codable {
     let title: String
     let description: String?
@@ -28,7 +25,6 @@ struct CreateModuleDTO: Codable {
     let is_active: Bool
     let sort_order: Int
 }
-
 struct UpdateModuleDTO: Codable {
     let title: String
     let description: String?
@@ -36,25 +32,25 @@ struct UpdateModuleDTO: Codable {
     let is_active: Bool
     let sort_order: Int
 }
-
 // MARK: - DTOs de Lecciones (Con CodingKeys para content_url)
-
-struct LessonDTO: Codable, Identifiable, Hashable {
+struct LessonDTO: Identifiable, Codable, Hashable {
     let id: UUID
     var title: String
     var content: String?
     var url_link: String?
-    var is_active: Bool
     var sort_order: Int
+    var is_active: Bool?
     let created_at: Date?
-    
     enum CodingKeys: String, CodingKey {
         case id, title
+        // Mapeo crucial: 'content' de Swift se lee/escribe como 'content_url' en JSON
         case content = "content_url"
-        case url_link, is_active, sort_order, created_at
+        case sort_order
+        case created_at
+        case is_active
+        case url_link
     }
 }
-
 struct CreateLessonDTO: Codable {
     let title: String
     let content: String?
@@ -67,21 +63,15 @@ struct CreateLessonDTO: Codable {
         case url_link, sort_order
     }
 }
-
 // MARK: - Clase del Servicio
-
 class CafecitosAPIService: ObservableObject {
     static let shared = CafecitosAPIService()
-
     @Published var modules: [ModuleDTO] = []
     @Published var lessons: [LessonDTO] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-
     private init() {}
-
     // MARK: Funciones de Módulos (CRUD de Módulos)
-
     @MainActor
     func fetchModules() async {
         isLoading = true
@@ -98,7 +88,6 @@ class CafecitosAPIService: ObservableObject {
         }
         isLoading = false
     }
-
     @MainActor
     func createModule(title: String, description: String, urlLink: String, isActive: Bool, sortOrder: Int) async -> ModuleDTO? {
         errorMessage = nil
@@ -169,7 +158,6 @@ class CafecitosAPIService: ObservableObject {
             return false
         }
     }
-
     @MainActor
     func deleteModule(moduleID: UUID) async -> Bool {
         errorMessage = nil
@@ -185,7 +173,6 @@ class CafecitosAPIService: ObservableObject {
             return false
         }
     }
-
     // MARK: Funciones de Lecciones (CRUD de Lecciones)
     
     @MainActor
@@ -201,7 +188,6 @@ class CafecitosAPIService: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
-
     @MainActor
     func createLesson(title: String, contentText: String?, urlLink: String?, sortOrder: Int) async -> LessonDTO? {
         errorMessage = nil
