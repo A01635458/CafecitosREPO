@@ -35,7 +35,7 @@ struct CoffeePlantListView: View {
                     
                     Spacer()
                     
-                    // Botón descargar ⬇️
+                    // Botón descargar
                     Button {
                         showDownloadConfirm = true
                     } label: {
@@ -51,7 +51,7 @@ struct CoffeePlantListView: View {
                     .tint(Color.ka_coffee)
                     .accessibilityLabel("Descargar plantas desde la nube")
                     
-                    // Botón subir ⬆️
+                    // Botón subir
                     Button {
                         showUploadConfirm = true
                     } label: {
@@ -89,7 +89,7 @@ struct CoffeePlantListView: View {
                 
                 // Lista
                 ScrollView {
-                    VStack(spacing: 16) {
+                    VStack() {
                         if plants.isEmpty {
                             VStack(spacing: 12) {
                                 Text("Aún no has registrado ninguna planta ☕️🌱")
@@ -119,7 +119,7 @@ struct CoffeePlantListView: View {
                                 .buttonStyle(.plain)
                             }
                             .padding(.horizontal, 20)
-                            .padding(.top, 16)
+                            .padding(.top, 4)
                         }
                     }
                 }

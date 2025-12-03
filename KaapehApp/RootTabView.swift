@@ -17,7 +17,7 @@ struct RootTabView: View {
             }
 
             Tab("Inicio", systemImage: "house.fill", value: 1) {
-                HomeView(selectedTab: $selectedTab)
+                HomeView(selectedTab: $selectedTab, authViewModel: authViewModel)
             }
 
             Tab("Aprender", systemImage: "book.fill", value: 2) {
