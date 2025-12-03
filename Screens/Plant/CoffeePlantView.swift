@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftData
-
+import Supabase
 
 
 
@@ -10,17 +10,64 @@ struct CoffeePlantListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \CoffeePlant.createdAt, order: .forward) private var plants: [CoffeePlant]
     
+    @ObservedObject var authViewModel: AuthViewModel
+    
     @State private var isPresentingAdd = false
+    
+    // Estados de sync
+    @State private var isUploading = false
+    @State private var isDownloading = false
+    @State private var syncErrorMessage: String?
+    
+    @State private var showUploadConfirm = false
+    @State private var showDownloadConfirm = false
+    
+    private var isBusy: Bool { isUploading || isDownloading }
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Header estilo Káapeh
-                HStack {
+                // Header
+                HStack(spacing: 12) {
                     Text("Mis plantas")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundStyle(.black)
+                    
                     Spacer()
+                    
+                    // Botón descargar ⬇️
+                    Button {
+                        showDownloadConfirm = true
+                    } label: {
+                        if isDownloading {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.down.circle")
+                                .font(.system(size: 20, weight: .semibold))
+                        }
+                    }
+                    .disabled(isBusy)
+                    .tint(Color.ka_coffee)
+                    .accessibilityLabel("Descargar plantas desde la nube")
+                    
+                    // Botón subir ⬆️
+                    Button {
+                        showUploadConfirm = true
+                    } label: {
+                        if isUploading {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.up.circle")
+                                .font(.system(size: 20, weight: .semibold))
+                        }
+                    }
+                    .disabled(isBusy)
+                    .tint(Color.ka_coffee)
+                    .accessibilityLabel("Subir plantas a la nube")
+                    
+                    // Botón agregar planta
                     Button {
                         isPresentingAdd = true
                     } label: {
@@ -40,10 +87,10 @@ struct CoffeePlantListView: View {
                     alignment: .bottom
                 )
                 
+                // Lista
                 ScrollView {
                     VStack(spacing: 16) {
                         if plants.isEmpty {
-                            // Estado vacío
                             VStack(spacing: 12) {
                                 Text("Aún no has registrado ninguna planta ☕️🌱")
                                     .multilineTextAlignment(.center)
@@ -80,11 +127,110 @@ struct CoffeePlantListView: View {
             }
         }
         .sheet(isPresented: $isPresentingAdd) {
-            AddCoffeePlantView()   // 👈 aquí usamos la vista correcta
+            AddCoffeePlantView()
+        }
+        // Alert de error
+        .alert("Error al sincronizar",
+               isPresented: Binding(
+                get: { syncErrorMessage != nil },
+                set: { _ in syncErrorMessage = nil }
+               )
+        ) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(syncErrorMessage ?? "Ocurrió un error desconocido.")
+        }
+        // Confirm subir
+        .confirmationDialog(
+            "Subir plantas a la nube",
+            isPresented: $showUploadConfirm
+        ) {
+            Button("Subir ahora", role: .destructive) {
+                Task { await uploadPlants() }
+            }
+            Button("Cancelar", role: .cancel) { }
+        } message: {
+            Text("Se enviarán todas tus plantas locales a Supabase.")
+        }
+        // Confirm descargar
+        .confirmationDialog(
+            "Descargar plantas desde la nube",
+            isPresented: $showDownloadConfirm
+        ) {
+            Button("Descargar ahora") {
+                Task { await downloadPlants() }
+            }
+            Button("Cancelar", role: .cancel) { }
+        } message: {
+            Text("Se sincronizarán las plantas guardadas en Supabase con tu dispositivo.")
         }
     }
 }
 
+extension CoffeePlantListView {
+    
+    @MainActor
+    private func uploadPlants() async {
+        isUploading = true
+        defer { isUploading = false }
+        
+        do {
+            let session = try await supabase.auth.session
+            let currentUser = session.user
+            
+            let remotesToUpload = plants.map { $0.toRemote(userId: currentUser.id) }
+            
+            _ = try await supabase
+                .from("coffee_plants")
+                .upsert(remotesToUpload)
+                .execute()
+            
+        } catch {
+            syncErrorMessage = error.localizedDescription
+        }
+    }
+    
+    @MainActor
+    private func downloadPlants() async {
+        isDownloading = true
+        defer { isDownloading = false }
+        
+        do {
+            let session = try await supabase.auth.session
+            let currentUser = session.user
+            
+            let response: PostgrestResponse<[RemoteCoffeePlant]> = try await supabase
+                .from("coffee_plants")
+                .select("*")    
+                .eq("user_id", value: currentUser.id)
+                .order("created_at", ascending: true)
+                .execute()
+            
+            let remotePlants = response.value
+            applyRemotePlants(remotePlants)
+            try modelContext.save()
+            
+        } catch {
+            syncErrorMessage = error.localizedDescription
+        }
+    }
+    
+    /// Fusiona plantas remotas con las locales (update/insert)
+    @MainActor
+    private func applyRemotePlants(_ remotePlants: [RemoteCoffeePlant]) {
+        for remote in remotePlants {
+            if let existing = plants.first(where: { $0.id == remote.id }) {
+                existing.name = remote.name
+                existing.varietal = remote.varietal
+                existing.stage = CoffeeStage(rawValue: remote.stage) ?? existing.stage
+                existing.stageStartedAt = remote.stageStartedAt
+            } else {
+                let newPlant = remote.toLocal()
+                modelContext.insert(newPlant)
+            }
+        }
+    }
+}
 // MARK: - Card resumida para la lista
 
 private struct CoffeePlantCard: View {
@@ -137,7 +283,7 @@ private struct AddCoffeePlantView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var name: String = ""
-    @State private var selectedVarietal: CoffeeVarietal = .bourbon   // 👈 picker state
+    @State private var selectedVarietal: CoffeeVarietal = .bourbon
     
     var body: some View {
         NavigationStack {
@@ -158,7 +304,7 @@ private struct AddCoffeePlantView: View {
                             .background(Color.ka_bg)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                         
-                        // 👇 Picker de tipo de café
+                        // Picker de tipo de café
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Tipo de café")
                                 .font(.subheadline)

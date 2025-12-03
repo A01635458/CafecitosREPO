@@ -12,6 +12,7 @@ struct ProfileView: View {
     @State private var username: String = ""
     @State private var full_name: String = ""
     @State private var email: String = ""
+    @State private var plants: Int = 0
 
     @State private var isLoadingProfile = false
     @State private var isUpdatingProfile = false
@@ -82,14 +83,14 @@ struct ProfileView: View {
                                     label: "Escaneos"
                                 )
                             }
-                            NavigationLink(destination: NotesView()) {
+                            
                                 ProfileStatCard(
-                                    icon: "book",
+                                    icon: "leaf",
                                     color: .green,
-                                    number: "\(notes.count)",
-                                    label: "Notas"
+                                    number: "\(plants)",
+                                    label: "Plantas"
                                 )
-                            }
+                            
                             NavigationLink(destination: AchievementsView()) {
                                 ProfileStatCard(
                                     icon: "rosette",
@@ -218,6 +219,15 @@ struct ProfileView: View {
             self.username = profile.username ?? ""
             self.full_name = profile.full_name ?? ""
             self.email = profile.email ?? ""
+            
+            let plantResp = try await supabase
+                .from("coffee_plants")
+                .select("id", count: .exact)
+                .eq("user_id", value: currentUser.id)
+                .execute()
+
+            self.plants = plantResp.count ?? 0
+
         } catch {
             debugPrint("Error fetching profile:", error)
         }
