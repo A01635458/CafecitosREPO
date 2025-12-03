@@ -12,7 +12,8 @@ struct ProfileView: View {
     @State private var username: String = ""
     @State private var full_name: String = ""
     @State private var email: String = ""
-    @State private var scans: [ScanModel] = []
+
+    @State private var plants: Int = 0
 
     @State private var isLoadingProfile = false
     @State private var isUpdatingProfile = false
@@ -79,18 +80,18 @@ struct ProfileView: View {
                                 ProfileStatCard(
                                     icon: "camera",
                                     color: .ka_coffee,
-                                    number: "\(scans.count)",
+                                    number: "0",
                                     label: "Escaneos"
                                 )
                             }
-                            NavigationLink(destination: NotesView()) {
+                            
                                 ProfileStatCard(
-                                    icon: "book",
+                                    icon: "leaf",
                                     color: .green,
-                                    number: "\(notes.count)",
-                                    label: "Notas"
+                                    number: "\(plants)",
+                                    label: "Plantas"
                                 )
-                            }
+                            
                             NavigationLink(destination: AchievementsView()) {
                                 ProfileStatCard(
                                     icon: "rosette",
@@ -193,7 +194,6 @@ struct ProfileView: View {
         }
         .task {
             await getInitialProfile()
-            await loadScans()
         }
     }
 
@@ -220,28 +220,17 @@ struct ProfileView: View {
             self.username = profile.username ?? ""
             self.full_name = profile.full_name ?? ""
             self.email = profile.email ?? ""
+            
+            let plantResp = try await supabase
+                .from("coffee_plants")
+                .select("id", count: .exact)
+                .eq("user_id", value: currentUser.id)
+                .execute()
+
+            self.plants = plantResp.count ?? 0
+
         } catch {
             debugPrint("Error fetching profile:", error)
-        }
-    }
-    
-    func loadScans() async {
-        do {
-            let session = try await supabase.auth.session
-            let userId = session.user.id
-
-            let response: [ScanModel] = try await supabase
-                .from("scans")
-                .select()
-                .eq("user_id", value: userId)
-                .execute()
-                .value
-
-            await MainActor.run {
-                self.scans = response
-            }
-        } catch {
-            debugPrint("Error loading scans:", error)
         }
     }
 

@@ -11,30 +11,29 @@ struct RootTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            
-            CameraView()
-                .tabItem { Label("Cámara", systemImage: "camera.fill") }
-                .tag(0)
-  
-            HomeView(selectedTab: $selectedTab)
-                .tabItem { Label("Inicio", systemImage: "house.fill") }
-                .tag(1)
 
-            LearnView()
-                .tabItem { Label("Aprender", systemImage: "book.fill") }
-                .tag(2)
-            
-            CoffeePlantListView()
-                .tabItem { Label("Plantas", systemImage: "leaf.fill") }
-                .tag(3)
-                
-            ProfileView(authViewModel: authViewModel)
-                .tabItem { Label("Perfil", systemImage: "person.circle.fill") }
-                .tag(4)
+            Tab("Cámara", systemImage: "camera.fill", value: 0) {
+                CameraView()
+            }
+
+            Tab("Inicio", systemImage: "house.fill", value: 1) {
+                HomeView(selectedTab: $selectedTab, authViewModel: authViewModel)
+            }
+
+            Tab("Aprender", systemImage: "book.fill", value: 2) {
+                LearnView()
+            }
+
+            Tab("Plantas", systemImage: "leaf.fill", value: 3) {
+                CoffeePlantListView(authViewModel: authViewModel)
+            }
+
+            Tab("Perfil", systemImage: "person.circle.fill", value: 4) {
+                ProfileView(authViewModel: authViewModel)
+            }
         }
         .tint(.ka_coffee)
         .background(Color.ka_surface)
     }
 }
-
 

@@ -3,7 +3,8 @@ import Foundation
 enum CoffeeVarietal: String, CaseIterable, Identifiable {
     case bourbon = "Bourbon"
     case typica = "Typica"
-    case maragogipe = "Maragogipe"
+    case hidalgo = "Pluma Hidalgo"
+    case geisha = "Geisha"
     
     var id: String { rawValue }
     
@@ -11,7 +12,8 @@ enum CoffeeVarietal: String, CaseIterable, Identifiable {
         switch self {
         case .bourbon:    return "Bourbon"
         case .typica:     return "Typica"
-        case .maragogipe: return "Maragogipe"
+        case .hidalgo: return "Pluma Hidalgo"
+        case .geisha:     return "Geisha"
         }
     }
 }
