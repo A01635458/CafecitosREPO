@@ -11,13 +11,25 @@ class AuthViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var feedbackMessage: String? = nil
     @Published var isError: Bool = false
+    @Published var fullname: String = ""
     
     func getInitialSession() async {
         // Attempt to restore an existing session on app launch (e.g., from persisted credentials).
         do {
             let current = try await supabase.auth.session
             self.session = current
+            let currentUser = current.user
             self.isAuthenticated = current != nil
+            
+            let profile: Profile = try await supabase
+                           .from("profiles")
+                           .select()
+                           .eq("id", value: currentUser.id)
+                           .single()
+                           .execute()
+                           .value
+            self.fullname = profile.full_name ?? ""
+            
         } catch {
             // If no session is available, explicitly reset state.
             print("No active session: \(error.localizedDescription)")

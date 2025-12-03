@@ -10,7 +10,7 @@ struct LessonHeaderView: View {
     let imageURL: String
     let title: String
     let subtitle: String
-    @Binding var isFavorite: Bool
+   
     
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -34,17 +34,7 @@ struct LessonHeaderView: View {
             .padding(20)
         }
         .overlay(alignment: .topTrailing) {
-            Button {
-                isFavorite.toggle()
-            } label: {
-                Image(systemName: isFavorite ? "heart.fill" : "heart")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(isFavorite ? .red : .white)
-                    .padding(12)
-                    .background(Color.black.opacity(0.35))
-                    .clipShape(Circle())
-                    .padding(20)
-            }
+          
         }
     }
 }
