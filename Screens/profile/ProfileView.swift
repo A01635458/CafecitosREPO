@@ -12,6 +12,7 @@ struct ProfileView: View {
     @State private var username: String = ""
     @State private var full_name: String = ""
     @State private var email: String = ""
+    @State private var scans: [ScanModel] = []
 
     @State private var plants: Int = 0
 
@@ -80,7 +81,7 @@ struct ProfileView: View {
                                 ProfileStatCard(
                                     icon: "camera",
                                     color: .ka_coffee,
-                                    number: "0",
+                                    number: "\(scans.count)",
                                     label: "Escaneos"
                                 )
                             }
@@ -194,6 +195,7 @@ struct ProfileView: View {
         }
         .task {
             await getInitialProfile()
+            await loadScans()
         }
     }
 
@@ -231,6 +233,26 @@ struct ProfileView: View {
 
         } catch {
             debugPrint("Error fetching profile:", error)
+        }
+    }
+    
+    func loadScans() async {
+        do {
+            let session = try await supabase.auth.session
+            let userId = session.user.id
+
+            let response: [ScanModel] = try await supabase
+                .from("scans")
+                .select()
+                .eq("user_id", value: userId)
+                .execute()
+                .value
+
+            await MainActor.run {
+                self.scans = response
+            }
+        } catch {
+            debugPrint("Error loading scans:", error)
         }
     }
 
