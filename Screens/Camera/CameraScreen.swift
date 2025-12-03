@@ -370,7 +370,7 @@ struct CameraScreen: View {
             if let user = supabase.auth.currentUser {
                 camera.saveScanToSupabase(
                     user_id: user.id,
-                    label: label,
+                    label: popupTitle,
                     info: popupText,
                     specialtyimpact: specialtyImpact,
                     preventiontips: preventionTips
