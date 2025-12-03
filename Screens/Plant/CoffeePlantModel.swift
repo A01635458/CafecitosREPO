@@ -63,43 +63,43 @@ struct EnvironmentRequirement {
 }
 
 struct EnvironmentRules {
-    // Ajusta los rangos según cómo quieras que se comporte tu "tamagotchi"
+    
     static let baseRequirements: [CoffeeStage: EnvironmentRequirement] = [
         .seed: EnvironmentRequirement( // 1
             waterRange: 60...80,   // húmedo constante
-            lightRange: 10...30    // sombra
+            lightRange: 32...35   // sombra
                                      ),
         .germination: EnvironmentRequirement( // 2
             waterRange: 60...80,
-            lightRange: 10...30
+            lightRange: 32...35
                                             ),
         .seedling: EnvironmentRequirement( // 3
             waterRange: 50...70,
-            lightRange: 35...70    // sombra parcial
+            lightRange: 65...67    // sombra parcial
                                          ),
         .juvenile: EnvironmentRequirement( // 4
             waterRange: 50...70,
-            lightRange: 35...70
+            lightRange: 65...67
                                          ),
         .transplanted: EnvironmentRequirement( // 5
             waterRange: 50...70,
-            lightRange: 20...40    // un poco más de sombra tras el estrés
+            lightRange: 32...35   // un poco más de sombra tras el estrés
                                              ),
         .vegetative: EnvironmentRequirement( // 6
             waterRange: 40...60,
-            lightRange: 40...70
+            lightRange: 65...67
                                            ),
         .flowering: EnvironmentRequirement( // 7
             waterRange: 40...60,
-            lightRange: 40...70
+            lightRange: 65...67
                                           ),
         .greenCherry: EnvironmentRequirement( // 8
             waterRange: 40...60,
-            lightRange: 70...100   // más sol
+            lightRange: 98...100   // más sol
                                             ),
         .ripeCherry: EnvironmentRequirement( // 9
             waterRange: 40...60,
-            lightRange: 70...100
+            lightRange: 98...100 
                                            ),
         // A partir de aquí el cafeto como planta ya no importa tanto,
         // son procesos post-cosecha:
@@ -125,32 +125,20 @@ struct EnvironmentRules {
                                     )
     ]
     
-    static let varietalOverrides: [CoffeeVarietal: [CoffeeStage: EnvironmentRequirement]] = [ // Parametros diferentes por varietal
-        .typica: [
-        
-            .seed: EnvironmentRequirement(
-                waterRange: 90...100,
-                lightRange: 90...100,
-    
-            ),
-            .flowering: EnvironmentRequirement(
-                waterRange: 45...60,
-                lightRange: 35...60,
-            
-            )
-        ]
-       
+    static let varietalOverrides: [CoffeeVarietal: [CoffeeStage: EnvironmentRequirement]] = [
+        .typica: typicaOverrides
     ]
     
     static func requirement(for stage: CoffeeStage,
-                            varietal: CoffeeVarietal) -> EnvironmentRequirement? {
-        // 1) Si hay override para ese varietal
-        if let override = varietalOverrides[varietal]?[stage] {
-            return override
-        }
-        // 2) Si no, usa base
-        return baseRequirements[stage]
-    }
+                               varietal: CoffeeVarietal) -> EnvironmentRequirement? {
+
+           if let override = varietalOverrides[varietal]?[stage] {
+               return override
+           }
+
+           return baseRequirements[stage]
+       }
+    
 }
 
 // MARK: - Lógica de juego (riego, luz, progreso, avances)

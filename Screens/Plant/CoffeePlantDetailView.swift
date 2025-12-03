@@ -136,7 +136,7 @@ struct CoffeePlantDetailView: View {
                 
                 Spacer(minLength: 0)
             }
-            .presentationDetents([.fraction(0.45)])      // 👈 se ve como bottom sheet
+            .presentationDetents([.fraction(0.45)])
             .presentationDragIndicator(.visible)
             .background(Color.ka_bg.ignoresSafeArea())
         }
