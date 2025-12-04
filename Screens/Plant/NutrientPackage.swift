@@ -27,7 +27,7 @@ struct NutrientRules {
             return .medium
         case .greenCherry:
             return .small
-        case .ripeCherry, .harvest, .processing, .drying, .roasting, .cup:
+        case .ripeCherry, .harvest, .processing, .roasting, .cup:
             return .small
         case .transplanted:
             return .small

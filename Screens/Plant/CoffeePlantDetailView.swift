@@ -13,13 +13,25 @@ struct CoffeePlantDetailView: View {
     @State private var showTips = false
     @State private var showNutrientSheet = false
     @State private var nutrientFeedback: String?
+    
+    // Animaciones
     @State private var showWaterFX = false
     @State private var showHarvestFX = false
     @State private var bounceScale: CGFloat = 1.0
     @State private var cherries: [FlyingCherry] = []
     @State private var harvestTapCount = 0
-    @State private var showBenefitSheet = false
     
+    // Minijuegos
+    @State private var showBenefitSheet = false
+    @State private var showWashingGame = false
+    @State private var washedGameCompleted = false
+    @State private var showHoneyGame = false
+    @State private var honeyGameCompleted = false
+    @State private var showNaturalGame = false
+    @State private var naturalGameCompleted = false
+    // Tueste
+    @State private var showRoastGame = false
+    @State private var roastGameCompleted = false
     var isBouncing: Bool {
         showWaterFX || showHarvestFX
     }
@@ -59,7 +71,19 @@ struct CoffeePlantDetailView: View {
         .background(Color.ka_bg.ignoresSafeArea())
         .onAppear {
             nutrientFeedback = nil
+            if plant.stage == .roasting && !roastGameCompleted {
+                DispatchQueue.main.async {
+                    showRoastGame = true
+                }
+            }
             try? modelContext.save()
+        }
+        .onChange(of: plant.stage) { newStage in
+            if newStage == .roasting && !roastGameCompleted {
+                DispatchQueue.main.async {
+                    showRoastGame = true
+                }
+            }
         }
         .toolbar { toolbarMenu }
         .alert("Consejos para \(plant.stage.displayName)",
@@ -76,7 +100,47 @@ struct CoffeePlantDetailView: View {
         } message: {
             Text("Esta acción no se puede deshacer.")
         }
+        .sheet(isPresented: $showRoastGame) {
+            RoastMinigameView { profile in
+          
+                plant.roastLevel   = profile.name
+                plant.roastSummary = profile.summary
+                plant.roastFlavors = profile.flavors.joined(separator: ", ")
+                plant.roastAromas  = profile.aromas.joined(separator: ", ")
+                
+                roastGameCompleted = true
+                showRoastGame = false
+                try? modelContext.save()
+            }
+            .presentationBackground(Color.ka_bg)
+        }
+        .sheet(isPresented: $showNaturalGame) {
+            NaturalProcessView {
+                naturalGameCompleted = true
+                showNaturalGame = false
+                try? modelContext.save()
+            }
+            .presentationBackground(Color.ka_bg) // opcional
+        }
+        .sheet(isPresented: $showHoneyGame) {
+            HoneyProcessView {
+                
+                honeyGameCompleted = true
+                showHoneyGame = false
+                try? modelContext.save()
+            }
+            .presentationBackground(Color.ka_bg)
+        }
+
+        .sheet(isPresented: $showWashingGame) {
+            WashingProcessView {
+                washedGameCompleted = true
+                showWashingGame = false
+            }
+            .presentationBackground(Color.ka_bg)
+        }
         .sheet(isPresented: $showBenefitSheet) {
+            
             VStack(spacing: 16) {
                 Capsule()
                     .fill(Color.secondary.opacity(0.3))
@@ -222,44 +286,76 @@ private extension CoffeePlantDetailView {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 4)
                     
-                    // Estado de riego y luz
-                    VStack(alignment: .leading, spacing: 12) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Riego: \(plant.water)% (\(waterDescription(plant.water)))")
-                                .font(.subheadline)
-                            ProgressView(value: Double(plant.water), total: 100)
+                    if plant.stage.preharvest {
+                        // Estado de riego y luz
+                        VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Riego: \(plant.water)% (\(waterDescription(plant.water)))")
+                                    .font(.subheadline)
+                                ProgressView(value: Double(plant.water), total: 100)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Luz: \(plant.light)% (\(lightDescription(plant.light)))")
+                                    .font(.subheadline)
+                                ProgressView(value: Double(plant.light), total: 100)
+                            }
                         }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Luz: \(plant.light)% (\(lightDescription(plant.light)))")
-                                .font(.subheadline)
-                            ProgressView(value: Double(plant.light), total: 100)
-                        }
+                        .padding(.top, 8)
                     }
-                    .padding(.top, 8)
                     
                     // Indicador si cumple requisitos
-                    if plant.environmentRequirementsMet {
-                        Text("✅ La planta está saludable")
-                            .font(.footnote)
-                            .foregroundStyle(.green)
-                    } else {
-                        Text("⚠️ Algo anda mal...")
-                            .font(.footnote)
-                            .foregroundStyle(.orange)
+                    if plant.stage.preharvest{
+                        if plant.environmentRequirementsMet {
+                            Text("✅ La planta está saludable")
+                                .font(.footnote)
+                                .foregroundStyle(.green)
+                        } else {
+                            Text("⚠️ Algo anda mal...")
+                                .font(.footnote)
+                                .foregroundStyle(.orange)
+                        }
                     }
                     
-                    // Calificación final de taza
+                    // Calificación final de taza y perfil de tueste
                     if plant.stage == .cup {
-                        VStack(spacing: 4) {
+                        VStack(alignment: .leading, spacing: 6) {
                             Text("Calificación SCA: \(plant.finalCupScore)/100")
                                 .font(.headline)
                             Text(plant.finalCupGrade)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                            
+                            if let roastLevel = plant.roastLevel {
+                                Divider().padding(.vertical, 4)
+                                
+                                Text("Perfil de tueste")
+                                    .font(.headline)
+                                
+                                Text(roastLevel)
+                                    .font(.subheadline.bold())
+                                
+                                if let summary = plant.roastSummary {
+                                    Text(summary)
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                if let flavors = plant.roastFlavors, !flavors.isEmpty {
+                                    Text("Sabores: \(flavors)")
+                                        .font(.footnote)
+                                }
+                                
+                                if let aromas = plant.roastAromas, !aromas.isEmpty {
+                                    Text("Aromas: \(aromas)")
+                                        .font(.footnote)
+                                }
+                            }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 8)
                     }
+
                 }
                 .padding(16)
                 
@@ -309,57 +405,40 @@ private extension CoffeePlantDetailView {
                 }
                 .padding(.horizontal, 20)
             } else {
-                VStack(spacing: 10) {
-                    // Fila 1: regar / quitar
-                    HStack(spacing: 12) {
-                        Button {
-                            removeWater()
-                        } label: {
-                            Label("Quitar Agua", systemImage: "drop.triangle.fill")
-                                .font(.system(size: 14, weight: .bold))
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity)
-                                .background(Color.ka_coffee)
-                                .foregroundStyle(Color.ka_surface)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                if plant.stage.preharvest {
+                    VStack(spacing: 10) {
+                        // Fila 1: regar / quitar
+                        HStack(spacing: 12) {
+                            Button {
+                                removeWater()
+                            } label: {
+                                Label("Quitar Agua", systemImage: "drop.triangle.fill")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .padding(.vertical, 10)
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.ka_coffee)
+                                    .foregroundStyle(Color.ka_surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                            
+                            Button {
+                                water()
+                            } label: {
+                                Label("Regar", systemImage: "drop.fill")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .padding(.vertical, 10)
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.ka_coffee)
+                                    .foregroundStyle(.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
                         }
                         
+                        // Fila 2: sombra / luz
                         Button {
-                            water()
+                            cycleLight()
                         } label: {
-                            Label("Regar", systemImage: "drop.fill")
-                                .font(.system(size: 14, weight: .bold))
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity)
-                                .background(Color.ka_coffee)
-                                .foregroundStyle(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                    }
-                    
-                    // Fila 2: sombra / luz
-                    Button {
-                        cycleLight()
-                    } label: {
-                        Label("\(lightDescription(plant.light))", systemImage: "sun.max.fill")
-                            .font(.system(size: 14, weight: .bold))
-                            .padding(.vertical, 10)
-                            .frame(maxWidth: .infinity)
-                            .background(Color.ka_surface)
-                            .foregroundStyle(Color.ka_coffee)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.ka_coffee.opacity(0.25), lineWidth: 1)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    
-                    // Fila 3: nutrientes (solo si aplica)
-                    if shouldShowNutrientsButton {
-                        Button {
-                            showNutrientSheet = true
-                        } label: {
-                            Label("Nutrientes", systemImage: "leaf.circle.fill")
+                            Label("\(lightDescription(plant.light))", systemImage: "sun.max.fill")
                                 .font(.system(size: 14, weight: .bold))
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
@@ -371,9 +450,28 @@ private extension CoffeePlantDetailView {
                                 )
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
-                    }
+                        
+                   
+                        
+                            Button {
+                                showNutrientSheet = true
+                            } label: {
+                                Label("Nutrientes", systemImage: "leaf.circle.fill")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .padding(.vertical, 10)
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.ka_surface)
+                                    .foregroundStyle(Color.ka_coffee)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.ka_coffee.opacity(0.25), lineWidth: 1)
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                        }
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 20)
+                
             }
         }
     }
@@ -394,24 +492,59 @@ private extension CoffeePlantDetailView {
         Group {
             if plant.stage != .harvest {
                 Button {
-                    advanceStage()
+                    if plant.stage == .processing {
+                        
+                       switch plant.benefitProcess {
+                       case .washed where !washedGameCompleted:
+                           showWashingGame = true
+                       case .honey where !honeyGameCompleted:
+                           showHoneyGame = true
+                       case .natural where !naturalGameCompleted:
+                           showNaturalGame = true
+                       default:
+                           advanceStage()
+                       }
+                        
+                    } else if plant.stage == .roasting {
+                        if !roastGameCompleted {
+                            showRoastGame = true
+                        } else {
+                            advanceStage()
+                        }
+
+                    } else {
+                        advanceStage()
+                    }
+                        
+                    
+                    
+                    
+                    
                 } label: {
-                    Label("Avanzar la fase", systemImage: "arrow.right.circle.fill")
-                        .font(.system(size: 16, weight: .bold))
-                        .padding(.vertical, 10)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.ka_coffee)
-                        .foregroundStyle(Color.ka_surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.ka_surface.opacity(0.25), lineWidth: 1)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    Label(
+                        plant.stage == .processing &&
+                        plant.benefitProcess == .washed &&
+                        !washedGameCompleted
+                        ? "Completa el prceso"
+                        : "Avanzar la fase",
+                        systemImage: "arrow.right.circle.fill"
+                    )
+                    .font(.system(size: 16, weight: .bold))
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.ka_coffee)
+                    .foregroundStyle(Color.ka_surface)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.ka_surface.opacity(0.25), lineWidth: 1)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .padding(.horizontal, 20)
             }
         }
     }
+
 }
 
 private extension CoffeePlantDetailView {
@@ -533,6 +666,28 @@ private extension CoffeePlantDetailView {
         plant.stageStartedAt = Date()
         harvestTapCount = 0
         showBenefitSheet = false
+        
+        switch type {
+            case .washed:
+                washedGameCompleted = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showWashingGame = true
+                }
+                
+            case .honey:
+                honeyGameCompleted = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showHoneyGame = true
+                }
+                
+            case .natural:
+                naturalGameCompleted = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                showNaturalGame = true
+                  }
+                break
+            }
+        
         try? modelContext.save()
     }
     
