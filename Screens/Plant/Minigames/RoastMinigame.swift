@@ -8,13 +8,13 @@ struct RoastMinigameView: View {
     // Fases
     private let phases = RoastPhase.allCases
     
-    // Estado del juego
+    
     @State private var currentPhaseIndex: Int = 0
     @State private var currentTemp: Double = 150
     @State private var isRunning: Bool = false
     @State private var elapsedInPhase: Double = 0
     
-    // Para calcular promedio de temperatura en cada fase
+    // Para calcular promedio
     @State private var tempSum: Double = 0
     @State private var tempSamples: Int = 0
     
@@ -67,7 +67,7 @@ struct RoastMinigameView: View {
                 .font(.subheadline)
                 .multilineTextAlignment(.center)
             
-            // Indicador de tiempo (el jugador puede alargar/acortar)
+            // Indicador de tiempo
             VStack(spacing: 4) {
                 Text("Tiempo en fase: \(Int(elapsedInPhase)) s")
                     .font(.subheadline)
@@ -89,7 +89,6 @@ struct RoastMinigameView: View {
                 }
             }
             
-            // Barra visual simple de “qué tan cerca” estás de la zona ideal
             VStack(alignment: .leading, spacing: 4) {
                 Text("Proximidad a la zona ideal")
                     .font(.caption)
@@ -204,19 +203,16 @@ struct RoastMinigameView: View {
         )
         phaseResults.append(result)
         
-        // Reset para la siguiente fase
         elapsedInPhase = 0
         tempSum = 0
         tempSamples = 0
         
         if currentPhaseIndex == phases.count - 1 {
-            // Se acabaron las fases → calcular perfil
             finalProfile = evaluateRoastProfile(from: phaseResults)
             gameFinished = true
         } else {
             currentPhaseIndex += 1
             
-            // Opcional: arrancar temp en el centro del rango ideal de la siguiente fase
             let nextPhase = phases[currentPhaseIndex]
             let ideal = nextPhase.idealTempRange
             currentTemp = (ideal.lowerBound + ideal.upperBound) / 2
@@ -237,9 +233,8 @@ struct RoastMinigameView: View {
     
     // MARK: - Evaluación del perfil
     
-    /// Evalúa los resultados y devuelve un perfil sencillo de tueste
+
     private func evaluateRoastProfile(from results: [PhaseResult]) -> RoastProfile {
-        // Buscar resultados por fase
         func result(for phase: RoastPhase) -> PhaseResult? {
             return results.first(where: { $0.phase == phase })
         }
@@ -248,12 +243,10 @@ struct RoastMinigameView: View {
         let maillard = result(for: .maillard)
         let dev = result(for: .development)
         
-        // Métricas súper sencillas
         let totalTime = results.reduce(0) { $0 + $1.duration }
         let devDuration = dev?.duration ?? 0
         let devTemp = dev?.averageTemp ?? 195
         
-        // Evaluamos nivel de tueste con reglas muy simples
         let roastLevel: String
         if devTemp < 195 && devDuration < 50 {
             roastLevel = "Tueste ligero"
@@ -263,7 +256,6 @@ struct RoastMinigameView: View {
             roastLevel = "Tueste oscuro"
         }
         
-        // Evaluar “balance” de Maillard
         var sweetness = "dulzor balanceado"
         if let m = maillard {
             if m.duration < m.phase.idealDuration * 0.7 {
@@ -273,7 +265,6 @@ struct RoastMinigameView: View {
             }
         }
         
-        // Evaluar posible subdesarrollo / sobre-desarrollo
         var defectNote: String?
         if let d = drying, d.duration < d.phase.idealDuration * 0.6 {
             defectNote = "ligeras notas vegetales por secado rápido"
