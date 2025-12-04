@@ -5,19 +5,19 @@ import Foundation
 
 struct ProfileView: View {
     @ObservedObject var authViewModel: AuthViewModel
-    @StateObject private var lessonsViewModel = LessonsViewModel()
-    
-    private var completedLessons: [Lesson] {
-        lessonsViewModel.lessons.filter { lessonsViewModel.isCompleted($0) }
-    }
-    
+    // SwiftData: notas
     @Query private var notes: [NoteEntity]
 
     // Supabase: campos de perfil
     @State private var username: String = ""
     @State private var full_name: String = ""
     @State private var email: String = ""
+    @State private var scans: [ScanModel] = []
+
     @State private var plants: Int = 0
+    
+    //NUEVA PROPIEDAD: Contar lecciones completadas para el logro
+    @State private var completedLessonsCount: Int = 0
 
     @State private var isLoadingProfile = false
     @State private var isUpdatingProfile = false
@@ -84,24 +84,25 @@ struct ProfileView: View {
                                 ProfileStatCard(
                                     icon: "camera",
                                     color: .ka_coffee,
-                                    number: "0",
+                                    number: "\(scans.count)",
                                     label: "Escaneos"
                                 )
                             }
                             
-                                ProfileStatCard(
-                                    icon: "leaf",
-                                    color: .green,
-                                    number: "\(plants)",
-                                    label: "Plantas"
-                                )
+                            ProfileStatCard(
+                                icon: "leaf",
+                                color: .green,
+                                number: "\(plants)",
+                                label: "Plantas"
+                            )
                             
-                            NavigationLink(destination: CompletedLessonsView(lessons: completedLessons)) {
+                            NavigationLink(destination: AchievementsView().environmentObject(authViewModel)) {
                                 ProfileStatCard(
-                                    icon: "book.fill",
+                                    icon: "rosette",
                                     color: .orange,
-                                    number: "0",
-                                    label: "Lecciones"
+                                    // ➡️ MOSTRAR EL CONTEO REAL DE LECCIONES COMPLETADAS
+                                    number: "\(completedLessonsCount)",
+                                    label: "Logros"
                                 )
                             }
                         }
@@ -155,6 +156,32 @@ struct ProfileView: View {
                                 .padding(.top, 8)
                             }
                         }
+                        
+                        // --- INICIO: Botón/Toggle de VoiceOver ---
+                        ProfileSectionTitle("Accesibilidad (Narración)")
+                        Card {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Toggle(isOn: $authViewModel.isVoiceOverActive) {
+                                    Label(
+                                        authViewModel.isVoiceOverActive ?
+                                            "Narración de App (Activada)" :
+                                            "Narración de App (Desactivada)",
+                                        systemImage: authViewModel.isVoiceOverActive ? "speaker.wave.3.fill" : "speaker.slash.fill"
+                                    )
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(.black)
+                                }
+                                .tint(Color.ka_coffee)
+                                .onChange(of: authViewModel.isVoiceOverActive) { newValue in
+                                    authViewModel.setVoiceOverPreference(isEnabled: newValue)
+                                }
+                                    
+                                Text("Controla si la aplicación debe narrar automáticamente datos curiosos, logros y mensajes de bienvenida. Esto no afecta el VoiceOver nativo de iOS.")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        // --- FIN: Botón/Toggle de VoiceOver ---
 
                         // Acerca de
                         ProfileSectionTitle("Acerca de")
@@ -198,7 +225,9 @@ struct ProfileView: View {
         }
         .task {
             await getInitialProfile()
-            await lessonsViewModel.fetchLessons()
+            await loadScans()
+            // ➡️ LLAMAR A LA NUEVA FUNCIÓN PARA OBTENER EL CONTEO DE LOGROS
+            await fetchCompletedLessonsCount()
         }
     }
 
@@ -236,6 +265,49 @@ struct ProfileView: View {
 
         } catch {
             debugPrint("Error fetching profile:", error)
+        }
+    }
+    
+    //NUEVA FUNCIÓN: Obtiene el conteo de lecciones completadas
+    func fetchCompletedLessonsCount() async {
+        do {
+            let session = try await supabase.auth.session
+            let userId = session.user.id
+
+            let response = try await supabase
+                .from("lesson_progress")
+                .select("id", count: .exact) // Contamos las filas
+                .eq("user_id", value: userId)
+                .eq("completed", value: true) // Solo las que están completadas
+                .execute()
+
+            await MainActor.run {
+                self.completedLessonsCount = response.count ?? 0
+            }
+        } catch {
+            debugPrint("Error fetching completed lessons count:", error)
+            // En caso de error, el conteo será 0, lo cual es seguro.
+        }
+    }
+    
+    // ... (El resto de funciones loadScans y updateProfileButtonTapped siguen iguales)
+    func loadScans() async {
+        do {
+            let session = try await supabase.auth.session
+            let userId = session.user.id
+
+            let response: [ScanModel] = try await supabase
+                .from("scans")
+                .select()
+                .eq("user_id", value: userId)
+                .execute()
+                .value
+
+            await MainActor.run {
+                self.scans = response
+            }
+        } catch {
+            debugPrint("Error loading scans:", error)
         }
     }
 
@@ -302,5 +374,3 @@ private struct ProfileSectionTitle: View {
         .padding(.horizontal, 20)
     }
 }
-
-
