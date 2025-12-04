@@ -11,7 +11,7 @@ struct ScansView: View {
 
                 Group {
                     if viewModel.isLoading {
-                        ProgressView("Cargando scans…")
+                        ProgressView("Cargando escaneos…")
                             .tint(Color.ka_coffee)
                     }
 
@@ -58,7 +58,7 @@ struct ScansView: View {
                                 .font(.system(size: 60))
                                 .foregroundColor(.gray.opacity(0.5))
 
-                            Text("No ha hecho ningún scans todavía")
+                            Text("No ha hecho ningún escaneo todavía")
                                 .font(.title3)
                                 .foregroundColor(Color.ka_coffee)
                         }
@@ -79,7 +79,7 @@ struct ScansView: View {
                     }
                 }
 
-                .navigationTitle("Mis Scans")
+                .navigationTitle("Mis Escaneos")
                 .toolbar {
                     Button(action: { Task { await viewModel.fetchScans() } }) {
                         Image(systemName: "arrow.clockwise")

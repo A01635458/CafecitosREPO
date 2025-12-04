@@ -5,7 +5,7 @@ import SwiftData
 struct KaapehApp: App {
     let container: ModelContainer
     init() {
-        let schema = Schema([NoteEntity.self, CoffeePlant.self, LessonEntity.self])
+        let schema = Schema([CoffeePlant.self, LessonEntity.self])
         let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
             container = try ModelContainer(for: schema, configurations: [configuration])
