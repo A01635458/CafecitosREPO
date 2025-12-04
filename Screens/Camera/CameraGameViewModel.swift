@@ -92,15 +92,16 @@ final class CameraGameViewModel: ObservableObject {
             score += 10
             lastScanMatch = ScanResult(
                 success: true,
-                message: "¡Correcto! Encontraste un grano \(currentMission.label)."
+                message: "Encontraste un grano \(currentMission.label)."
             )
             newMission()
         } else {
-            score -= 5
+            score -= 3
             lastScanMatch = ScanResult(
                 success: false,
-                message: "Era \(scanItem), pero debías encontrar \(currentMission.label)."
+                message: "El grano que se encontro era un grano \(scanItem), pero debías encontrar un grano \(currentMission.label)."
             )
+            newMission()
         }
     }
     

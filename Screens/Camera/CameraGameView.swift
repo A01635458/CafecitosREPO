@@ -142,7 +142,7 @@ struct CameraGameView: View {
             
             withAnimation { showResult = true }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.8) {
                 withAnimation { showResult = false }
             }
         }
