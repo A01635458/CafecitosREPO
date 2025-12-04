@@ -99,7 +99,7 @@ struct LearnView: View {
     }
 }
 
-// MARK: - Card de lección, estilo Kaapeh
+
 
 private struct LessonCard: View {
     let lesson: Lesson
