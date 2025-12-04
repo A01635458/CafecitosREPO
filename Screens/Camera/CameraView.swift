@@ -14,6 +14,7 @@ import SwiftUI
 
 struct CameraView: View {
     @State private var showScanner = false
+    @State private var showGame = false
     
     var body: some View {
         NavigationStack {
@@ -30,7 +31,7 @@ struct CameraView: View {
                 Text("Escanear planta o grano")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundStyle(.black)
-                Text("Usa la cámara para identificar el tipo de grano que es y aprender mas sobre ella.")
+                Text("Usa la cámara para identificar el tipo de defecto que tiene el grano y aprender mas sobre ella o juega a identificar el grano, para saber que tan rapido eres en identificar los defectos de varios granos.")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -51,6 +52,20 @@ struct CameraView: View {
                         .padding(.horizontal, 40)
                 }
                 
+                Button {
+                    showGame = true
+                } label: {
+                    Label("Iniciar juego de granos", systemImage: "gamecontroller.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.ka_coffee.opacity(0.85))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .ka_coffee.opacity(0.25), radius: 5, x: 0, y: 3)
+                        .padding(.horizontal, 40)
+                }
+                
                 Spacer()
             }
             .background(Color.ka_bg.ignoresSafeArea())
@@ -62,8 +77,13 @@ struct CameraView: View {
                         .bold()
                 }
             }
+            
             .sheet(isPresented: $showScanner) {
-                CameraScreen() // tu cámara funcional
+                CameraScreen()
+            }
+            
+            .sheet(isPresented: $showGame) {
+                CameraGameView()
             }
         }
     }
