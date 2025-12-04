@@ -50,7 +50,7 @@ struct ProfileView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
-                        // Profile card (usa datos reales de Supabase)
+                        // Profile card
                         Card {
                             VStack(spacing: 16) {
                                 Circle()
@@ -100,7 +100,6 @@ struct ProfileView: View {
                                 ProfileStatCard(
                                     icon: "rosette",
                                     color: .orange,
-                                    // ➡️ MOSTRAR EL CONTEO REAL DE LECCIONES COMPLETADAS
                                     number: "\(completedLessonsCount)",
                                     label: "Logros"
                                 )
@@ -157,7 +156,7 @@ struct ProfileView: View {
                             }
                         }
                         
-                        // --- INICIO: Botón/Toggle de VoiceOver ---
+
                         ProfileSectionTitle("Accesibilidad (Narración)")
                         Card {
                             VStack(alignment: .leading, spacing: 12) {
@@ -226,7 +225,6 @@ struct ProfileView: View {
         .task {
             await getInitialProfile()
             await loadScans()
-            // ➡️ LLAMAR A LA NUEVA FUNCIÓN PARA OBTENER EL CONTEO DE LOGROS
             await fetchCompletedLessonsCount()
         }
     }
@@ -268,7 +266,6 @@ struct ProfileView: View {
         }
     }
     
-    //NUEVA FUNCIÓN: Obtiene el conteo de lecciones completadas
     func fetchCompletedLessonsCount() async {
         do {
             let session = try await supabase.auth.session
@@ -286,11 +283,11 @@ struct ProfileView: View {
             }
         } catch {
             debugPrint("Error fetching completed lessons count:", error)
-            // En caso de error, el conteo será 0, lo cual es seguro.
+
         }
     }
     
-    // ... (El resto de funciones loadScans y updateProfileButtonTapped siguen iguales)
+
     func loadScans() async {
         do {
             let session = try await supabase.auth.session
@@ -338,7 +335,7 @@ struct ProfileView: View {
     }
 }
 
-// MARK: - Components (igual que tu versión)
+// MARK: - Components
 
 private struct ProfileStatCard: View {
     let icon: String
