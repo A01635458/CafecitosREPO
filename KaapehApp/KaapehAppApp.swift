@@ -12,9 +12,7 @@ struct KaapehApp: App {
         do {
             container = try ModelContainer(for: schema, configurations: [configuration])
         } catch {
-            // ⚠️ SOLO PARA DESARROLLO:
-            // si la migración falla, borramos el store y lo recreamos
-            let url = configuration.url   // 👈 ya no es optional
+            let url = configuration.url   
             try? FileManager.default.removeItem(at: url)
             
             container = try! ModelContainer(for: schema, configurations: [configuration])

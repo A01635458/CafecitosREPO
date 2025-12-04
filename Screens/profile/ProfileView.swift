@@ -5,7 +5,12 @@ import Foundation
 
 struct ProfileView: View {
     @ObservedObject var authViewModel: AuthViewModel
-    // SwiftData: notas
+    @StateObject private var lessonsViewModel = LessonsViewModel()
+    
+    private var completedLessons: [Lesson] {
+        lessonsViewModel.lessons.filter { lessonsViewModel.isCompleted($0) }
+    }
+    
     @Query private var notes: [NoteEntity]
 
     // Supabase: campos de perfil
@@ -91,12 +96,12 @@ struct ProfileView: View {
                                     label: "Plantas"
                                 )
                             
-                            NavigationLink(destination: AchievementsView()) {
+                            NavigationLink(destination: CompletedLessonsView(lessons: completedLessons)) {
                                 ProfileStatCard(
-                                    icon: "rosette",
+                                    icon: "book.fill",
                                     color: .orange,
                                     number: "0",
-                                    label: "Logros"
+                                    label: "Lecciones"
                                 )
                             }
                         }
@@ -193,6 +198,7 @@ struct ProfileView: View {
         }
         .task {
             await getInitialProfile()
+            await lessonsViewModel.fetchLessons()
         }
     }
 

@@ -12,7 +12,6 @@ enum CoffeeStage: String, Codable, CaseIterable {
     case ripeCherry
     case harvest
     case processing
-    case drying
     case roasting
     case cup
     
@@ -29,7 +28,6 @@ enum CoffeeStage: String, Codable, CaseIterable {
         case .ripeCherry:    return "Maduración"
         case .harvest:       return "Cosecha"
         case .processing:    return "Beneficio"
-        case .drying:        return "Secado"
         case .roasting:      return "Tostado"
         case .cup:           return "Taza final"
         }
@@ -50,7 +48,6 @@ struct CoffeeStageTimeline {
         .ripeCherry:   8 * 60 * 60,
         .harvest:      2 * 60 * 60,
         .processing:   2 * 60 * 60,
-        .drying:       4 * 60 * 60,
         .roasting:     1 * 60 * 60,
         .cup:          0 // Etapa final
     ]
@@ -64,4 +61,25 @@ struct CoffeeStageTimeline {
     }
 }
 
-
+extension CoffeeStage {
+    /// Etapas donde el ambiente (agua/luz) del cafeto todavía importa
+    var preharvest: Bool {
+        switch self {
+        case .seed,
+             .germination,
+             .seedling,
+             .juvenile,
+             .transplanted,
+             .vegetative,
+             .flowering,
+             .greenCherry,
+             .ripeCherry:
+            return true
+        case .harvest,
+             .processing,
+             .roasting,
+             .cup:
+            return false
+        }
+    }
+}

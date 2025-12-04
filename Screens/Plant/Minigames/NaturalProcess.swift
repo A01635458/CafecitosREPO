@@ -26,7 +26,7 @@ struct NaturalProcessView: View {
             Text("Proceso Natural")
                 .font(.title2.bold())
             
-            Text("En el proceso natural, las cerezas se secan enteras al sol.\nToca las cerezas con secado ideal (las más sólidas).")
+            Text("En el proceso natural, las cerezas se secan enteras al sol. Toca las cerezas con secado ideal.")
                 .font(.callout)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)

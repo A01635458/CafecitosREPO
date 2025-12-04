@@ -23,6 +23,12 @@ class CoffeePlant {
     var nutrientBonus: Double // nutrientes
     var benefitProcessRaw: String?
     
+    // Tueste
+    var roastLevel: String?
+    var roastSummary: String?
+    var roastFlavors: String?
+    var roastAromas: String?
+    
     init(
         id: UUID = UUID(),
         name: String,
@@ -30,8 +36,8 @@ class CoffeePlant {
         createdAt: Date = .now,
         stage: CoffeeStage = .seed,
         stageStartedAt: Date = .now,
-        water: Int = 50,
-        light: Int = 30, // sombra
+        water: Int = 0,
+        light: Int = 0, // sombra
         lastWaterUpdate: Date? = nil,
         lastLightUpdate: Date? = nil,
         qualityAccumulated: Double = 0,
@@ -111,10 +117,6 @@ struct EnvironmentRules {
             waterRange: nil,
             lightRange: nil
                                            ),
-        .drying: EnvironmentRequirement( // 12
-            waterRange: nil,
-            lightRange: 60...100
-                                       ),
         .roasting: EnvironmentRequirement( // 13
             waterRange: nil,
             lightRange: nil
@@ -126,7 +128,9 @@ struct EnvironmentRules {
     ]
     
     static let varietalOverrides: [CoffeeVarietal: [CoffeeStage: EnvironmentRequirement]] = [
-        .typica: typicaOverrides
+        .typica: typicaOverrides,
+        .geisha: geishaOverrides,
+        .hidalgo: plumaHidalgoOverrides
     ]
     
     static func requirement(for stage: CoffeeStage,
@@ -147,7 +151,7 @@ extension CoffeePlant {
     
     var isPostHarvestStage: Bool {
         switch stage {
-        case .harvest, .processing, .drying, .roasting, .cup:
+        case .harvest, .processing, .roasting, .cup:
             return true
         default:
             return false

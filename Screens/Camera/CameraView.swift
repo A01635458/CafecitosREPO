@@ -69,8 +69,3 @@ struct CameraView: View {
     }
 }
 
-#Preview {
-    PreviewEnvironment {
-        CameraView()
-    }
-}
