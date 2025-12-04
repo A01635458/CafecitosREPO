@@ -7,21 +7,26 @@
 
 import SwiftData
 import Foundation
+
 @Model
 final class LessonEntity {
     @Attribute(.unique)
     var id: UUID
     
     var title: String
+    var subtitle: String
     var content: String
     var bannerURL: String?
     var createdAt: Date?
+    var updatedAt: Date?
     
     init(lesson: Lesson) {
         self.id = lesson.id
         self.title = lesson.title
+        self.subtitle = lesson.subtitle
         self.content = lesson.content
         self.bannerURL = lesson.bannerURL
         self.createdAt = lesson.createdAt
+        self.updatedAt = lesson.updatedAt
     }
 }
