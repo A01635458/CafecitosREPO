@@ -6,7 +6,7 @@ struct KaapehApp: App {
     let container: ModelContainer
 
     init() {
-        let schema = Schema([NoteEntity.self, CoffeePlant.self])
+        let schema = Schema([CoffeePlant.self])
         let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
