@@ -5,8 +5,6 @@ import Foundation
 
 struct ProfileView: View {
     @ObservedObject var authViewModel: AuthViewModel
-    // SwiftData: notas
-    @Query private var notes: [NoteEntity]
 
     // Supabase: campos de perfil
     @State private var username: String = ""

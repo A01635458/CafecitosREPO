@@ -1,19 +1,38 @@
 import SwiftUI
+import SwiftData
 
 struct LearnView: View {
     @StateObject private var viewModel = LessonsViewModel()
     
+    @Environment(\.modelContext) private var modelContext
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // MARK: Header
                 HStack(spacing: 12) {
                     Text("Aprender")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundStyle(.black)
-                    
+                        
                     Spacer()
                     
+                    //Botón de Descargar
+                    Button {
+                        Task {
+                            await viewModel.downloadAndSaveLessons(modelContext: modelContext)
+                        }
+                    } label: {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundStyle(Color.ka_coffee)
+                    }
+                    
+                    //Botón de Ver Descargas
+                    NavigationLink(destination: DownloadedLessonsView()) {
+                        Image(systemName: "tray.and.arrow.down.fill")
+                            .font(.system(size: 24))
+                            .foregroundStyle(Color.ka_coffee)
+                    }
                 }
                 .padding(.top, 60)
                 .padding(.bottom, 24)
@@ -26,7 +45,6 @@ struct LearnView: View {
                     alignment: .bottom
                 )
                 
-                // MARK: Lista de lecciones
                 ScrollView {
                     VStack() {
                         if viewModel.isLoading {
@@ -47,17 +65,6 @@ struct LearnView: View {
                                     .font(.footnote)
                                     .foregroundStyle(.red)
                                 
-                                Button {
-                                    Task { await viewModel.fetchLessons() }
-                                } label: {
-                                    Text("Reintentar")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 10)
-                                        .background(Color.ka_coffee)
-                                        .foregroundStyle(.white)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                }
                             }
                             .padding(.top, 40)
                             .padding(.horizontal, 24)
@@ -77,12 +84,13 @@ struct LearnView: View {
                             
                         } else {
                             ForEach(viewModel.lessons) { lesson in
-                                NavigationLink {
-                                    LessonDetailView(lesson: lesson)
-                                } label: {
-                                    LessonCard(lesson: lesson)
-                                }
-                                .buttonStyle(.plain)
+                                NavigationLink(
+                                    destination: LessonDetailView(lesson: lesson),
+                                    label: {
+                                        LessonCard(lesson: lesson)
+                                            .buttonStyle(.plain)
+                                    }
+                                )
                             }
                             .padding(.horizontal, 20)
                             .padding(.top, 4)
@@ -98,16 +106,12 @@ struct LearnView: View {
         }
     }
 }
-
-
-
 private struct LessonCard: View {
     let lesson: Lesson
     
     var body: some View {
         Card {
             HStack(spacing: 16) {
-                // Imagen/banner cuadrado como avatar
                 if let urlString = lesson.bannerURL,
                    let url = URL(string: urlString) {
                     AsyncImage(url: url) { phase in
@@ -170,10 +174,9 @@ private struct LessonCard: View {
     
     private var previewText: String {
         if lesson.content.count > 80 {
-            String(lesson.content.prefix(80)) + "…"
+            return String(lesson.content.prefix(80)) + "…"
         } else {
-            lesson.content
+            return lesson.content
         }
     }
 }
-
