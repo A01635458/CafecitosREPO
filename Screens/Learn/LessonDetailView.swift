@@ -5,88 +5,88 @@ struct LessonDetailView: View {
     @EnvironmentObject var lessonsViewModel: LessonsViewModel
     
     var body: some View {
-        ZStack {
-            // Fondo
-            Color.ka_bg.ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        
-                        let urlString = lesson.bannerURL ?? ""
-                        
-                        LessonHeaderView(
-                            imageURL: urlString,
-                            title: lesson.title,
-                            subtitle: lesson.subtitle
-                        )
+        ScrollView {
+            VStack(spacing: 16) {
+                let urlString = lesson.bannerURL ?? ""
+                
+                LessonHeaderView(
+                    imageURL: urlString,
+                    title: lesson.title,
+                    subtitle: lesson.subtitle
+                )
+                .frame(maxWidth: .infinity)
+                
+                Card {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Contenido")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(.black)
                         
                         Text(lesson.content)
                             .font(.body)
+                            .foregroundStyle(.primary)
                             .multilineTextAlignment(.leading)
                         
                         if let createdAt = lesson.createdAt {
                             Text("Creada el \(createdAt.formatted(date: .abbreviated, time: .omitted))")
                                 .font(.footnote)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                                 .padding(.top, 8)
                         }
-                        
-                        Spacer(minLength: 120)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                }
-                
-               
-                Spacer(minLength: 0)
-            }
-            
-       
-            VStack {
-                Spacer()
-                
-                Button {
-                    Task {
-                        await lessonsViewModel.markCompleted(lesson)
-                    }
-                } label: {
-                    HStack {
-                        Image(systemName:
-                                lessonsViewModel.isCompleted(lesson)
-                                ? "checkmark.circle.fill"
-                                : "checkmark.circle"
-                        )
-                        
-                        Text(
-                            lessonsViewModel.isCompleted(lesson)
-                            ? "Lección completada"
-                            : "Marcar como completada"
-                        )
-                    }
-                    .font(.system(size: 17, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(
-                        lessonsViewModel.isCompleted(lesson)
-                        ? Color.ka_surface
-                        : Color.ka_coffee
-                    )
-                    .foregroundColor(
-                        lessonsViewModel.isCompleted(lesson)
-                        ? .black
-                        : .white
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
+                    .padding(12)
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-                .ignoresSafeArea(.keyboard)  
+                
+                Spacer(minLength: 40)
             }
+            .padding(.top, 16)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .background(Color.ka_bg.ignoresSafeArea())
+        
+        // Botón fijo abajo, sin tapar el contenido
+        .safeAreaInset(edge: .bottom) {
+            Button {
+                Task {
+                    await lessonsViewModel.markCompleted(lesson)
+                }
+            } label: {
+                HStack {
+                    Image(systemName:
+                            lessonsViewModel.isCompleted(lesson)
+                            ? "checkmark.circle.fill"
+                            : "checkmark.circle"
+                    )
+                    
+                    Text(
+                        lessonsViewModel.isCompleted(lesson)
+                        ? "Lección completada"
+                        : "Marcar como completada"
+                    )
+                }
+                .font(.system(size: 17, weight: .semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(
+                    lessonsViewModel.isCompleted(lesson)
+                    ? Color.ka_surface
+                    : Color.ka_coffee
+                )
+                .foregroundColor(
+                    lessonsViewModel.isCompleted(lesson)
+                    ? .black
+                    : .white
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 8)
+            .background(Color.ka_bg.ignoresSafeArea())
+        }
         .navigationTitle("Lección")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
