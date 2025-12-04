@@ -14,7 +14,7 @@ enum MissionType { case label, trait }
 final class CameraGameViewModel: ObservableObject {
 
     @Published var score = 0
-    @Published var timeLeft = 30
+    @Published var timeLeft = 60
     @Published var currentMission = CoffeeMission(label: "agrio", trait: "fermentado")
     @Published var lastScanMatch: ScanResult?
     @Published var currentMissionType: MissionType = .label
@@ -61,7 +61,7 @@ final class CameraGameViewModel: ObservableObject {
     
     func startGame() {
         score = 0
-        timeLeft = 30
+        timeLeft = 60
         newMission()
 
         timerNumber?.cancel()
