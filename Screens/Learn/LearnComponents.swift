@@ -10,34 +10,58 @@ struct LessonHeaderView: View {
     let imageURL: String
     let title: String
     let subtitle: String
-   
-    
+
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            AsyncImage(url: URL(string: imageURL)) { img in
-                img.resizable().scaledToFill()
-            } placeholder: { Color.gray.opacity(0.2) }
-            .frame(height: 260)
-            .clipped()
-            
-            LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .center, endPoint: .bottom)
-                .frame(height: 260)
-            
+            // Imagen de fondo
+            if let url = URL(string: imageURL), !imageURL.isEmpty {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        Color.gray.opacity(0.2)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()      // llena el frame
+                    case .failure:
+                        Color.gray.opacity(0.2)
+                    @unknown default:
+                        Color.gray.opacity(0.2)
+                    }
+                }
+            } else {
+                Color.gray.opacity(0.2)
+            }
+
+            // Degradado inferior
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.55)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+
+            // Texto
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
-                    .font(.system(size: 30, weight: .bold))
+                    .font(.system(size: 26, weight: .bold))
                     .foregroundColor(.white)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
+
                 Text(subtitle)
                     .font(.system(size: 15))
                     .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(2)
             }
             .padding(20)
         }
-        .overlay(alignment: .topTrailing) {
-          
-        }
+        .frame(maxWidth: .infinity)            
+        .aspectRatio(16.0 / 9.0, contentMode: .fill)
+        .clipped()
     }
 }
+
+
 
 // MARK: - Texto principal
 struct LessonTextBlock: View {

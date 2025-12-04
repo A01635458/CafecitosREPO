@@ -106,54 +106,30 @@ struct LearnView: View {
         }
     }
 }
+
 private struct LessonCard: View {
     let lesson: Lesson
     
     var body: some View {
         Card {
-            HStack(spacing: 16) {
-                if let urlString = lesson.bannerURL,
-                   let url = URL(string: urlString) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            ZStack {
-                                Color(red: 0.93, green: 0.86, blue: 0.74)
-                                ProgressView()
-                            }
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        case .failure:
-                            Color(red: 0.93, green: 0.86, blue: 0.74)
-                        @unknown default:
-                            Color(red: 0.93, green: 0.86, blue: 0.74)
-                        }
-                    }
-                    .frame(width: 56, height: 56)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                } else {
-                    ZStack {
-                        Color(red: 0.93, green: 0.86, blue: 0.74)
-                        Image(systemName: "book.closed.fill")
-                            .font(.system(size: 24))
-                            .foregroundStyle(Color.ka_coffee)
-                    }
-                    .frame(width: 56, height: 56)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                }
+            HStack(spacing: 14) {
                 
-                VStack(alignment: .leading, spacing: 6) {
+                // MARK: - Imagen
+                lessonImage
+                    .frame(width: 56, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                
+                // MARK: - Textos alineados
+                VStack(alignment: .leading, spacing: 4) {
                     Text(lesson.title)
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.black)
                         .lineLimit(2)
                     
-                    Text(previewText)
+                    Text(lesson.subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
+                        .lineLimit(1)
                     
                     if let createdAt = lesson.createdAt {
                         Text(createdAt.formatted(date: .abbreviated, time: .omitted))
@@ -161,22 +137,50 @@ private struct LessonCard: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                .padding(.leading, 4)
                 
                 Spacer()
                 
+                // MARK: - Chevron
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.tertiary)
             }
-            .padding(12)
+            .padding(14)
         }
     }
     
-    private var previewText: String {
-        if lesson.content.count > 80 {
-            return String(lesson.content.prefix(80)) + "…"
-        } else {
-            return lesson.content
+    // MARK: - Imagen modular
+    private var lessonImage: some View {
+        Group {
+            if let urlString = lesson.bannerURL,
+               let url = URL(string: urlString) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        Color(red: 0.93, green: 0.86, blue: 0.74)
+                            .overlay(ProgressView())
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    case .failure:
+                        placeholder
+                    @unknown default:
+                        placeholder
+                    }
+                }
+            } else {
+                placeholder
+            }
         }
     }
+    
+    private var placeholder: some View {
+        Color(red: 0.93, green: 0.86, blue: 0.74)
+            .overlay(
+                Image(systemName: "book.closed.fill")
+                    .font(.system(size: 22))
+                    .foregroundStyle(.brown)
+            )
+    }
 }
+
