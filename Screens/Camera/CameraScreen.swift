@@ -363,6 +363,18 @@ struct CameraScreen: View {
                 specialtyImpact = " ❌ Este grano de cafe no aporta a la elaboracion de cafe de especialidad, ya que estos granos afectan inocuidad del producto y destruye el perfil de taza. Los estándares SCA penalizan fuertemente este defecto."
                 preventionTips = "Controlar humedad, evitar lluvias durante secado."
                 withAnimation { showPopup = true }
+            case "averanado":
+                popupTitle = "🏜️ Grano Averanado"
+                popupText = "El grano averanado proviene de cerezas que no alcanzaron un desarrollo completo dentro del fruto. Usualmente ocurre por falta de nutrientes, estrés hídrico, ramas sobrecargadas o sombra excesiva. Este tipo de grano muestra un aspecto arrugado, seco y poco denso. En taza aporta sabores planos, secos y sin dulzor, disminuyendo la complejidad aromática del café."
+                specialtyImpact = " ❌ Este grano de cafe no aporta a la elaboracion de cafe de especialidad, ya que estos granos contienen una baja densidad y pobre desarrollo, aporta notas herbales, papeles y sequedad. En los estándares SCA, el grano averenado se clasifica como un defecto secundario, pero su presencia en grandes cantidades perjudica el puntaje final."
+                preventionTips = "Mantener una nutrición adecuada de la planta, evitar sobrecarga de ramas, asegurar riegos oportunos y realizar podas que mejoren la distribución de energía hacia los frutos."
+                withAnimation { showPopup = true }
+            case "mordido":
+                popupTitle = "🦷 Grano Mordido"
+                popupText = "El grano mordido es un defecto secundario muy común, generado por maquinaria de despulpado o trilla mal calibrada. Cuando los rodillos aplican demasiada presión o fricción, el grano sufre cortes o bordes rotos, adquiriendo un aspecto mordido y un tono más oscuro o rojizo por oxidación. En taza puede aportar sabores terrosos, fermentados o ásperos, especialmente si aparece en altas proporciones."
+                specialtyImpact = " ❌ Este grano de cafe no aporta a la elaboracion de cafe de especialidad, ya que estos granos a pesar de contener un defecto secundario según los estándares SCA, afecta de manera notable la calidad final, ya que estos reducen uniformidad, generan sabores no deseados y disminuye la consistencia del perfil en cafés de especialidad. Su presencia excesiva puede bajar el puntaje final del lote."
+                preventionTips = "Ajustar periódicamente la maquinaria de despulpado y trilla, evitar rodillos demasiado cerrados, revisar alineaciones, y realizar mantenimientos preventivos para minimizar la fricción y presión excesiva sobre el grano."
+                withAnimation { showPopup = true }
             default:
                 break
             }

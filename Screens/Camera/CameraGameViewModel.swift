@@ -29,7 +29,13 @@ final class CameraGameViewModel: ObservableObject {
         "Los granos cereza seca son comunes en procesos mal depulpados.",
         "Los granos 'esponjosos' muestran secado acelerado: generan notas vegetales.",
         "Un grano 'fogueado' fue expuesto a calor excesivo durante el secado.",
-        "La clasificación manual mejora la calidad final antes de la exportación."
+        "La clasificación manual mejora la calidad final antes de la exportación.",
+        "Los cafés de altura desarrollan mayor acidez compleja y suelen tener mejor densidad.",
+        "Un beneficio húmedo limpio evita fermentaciones indeseadas en el mucílago.",
+        "Una buena recolección selectiva garantiza dulzor natural y balance en la taza.",
+        "Los granos partidos se tuestan de forma desigual: pueden generar notas amargas.",
+        "Un secado lento y uniforme evita sabores a pasto, tabaco crudo o humedad.",
+        "El control de agua en fermentaciones prolongadas evita notas alcohólicas agresivas."
     ]
     
     private var timerNumber: AnyCancellable?
@@ -46,7 +52,9 @@ final class CameraGameViewModel: ObservableObject {
         CoffeeMission(label: "cafeblanco", trait: "con falta de color"),
         CoffeeMission(label: "cafeinmaduro", trait: "verde"),
         CoffeeMission(label: "cafenegro", trait: "oscuro y sobrefermentado"),
-        CoffeeMission(label: "dañoporhongo", trait: "mohoso y fungoso")
+        CoffeeMission(label: "dañoporhongo", trait: "mohoso y fungoso"),
+        CoffeeMission(label: "averanado", trait: "arrugado y poco denso"),
+        CoffeeMission(label: "mordido", trait: "con bordes rotos")
     ]
     
     init() {
