@@ -48,4 +48,36 @@ Brindar conocimiento accesible y práctico sobre el cultivo, cuidado y procesami
 
 
 
+flowchart LR
+    subgraph UserDevice["📱 iOS Device"]
+        subgraph KaapehApp["Kaapeh iOS App (SwiftUI)"]
+            direction TB
+            UI[SwiftUI Views\n(Home, Learn, Plantas, Perfil, Minijuegos)]
+            Logic[Domain & App Logic\n(ViewModels / Managers)]
+            SwiftData[(SwiftData\nLocal Models\nCoffeePlant, Progress, Settings)]
+            SupabaseClient[Networking Layer\nSupabase Client Wrapper]
+        end
+    end
+
+    subgraph SupabaseCloud["☁️ Supabase Backend"]
+        direction TB
+        Auth[Auth Service\n(email/password, roles)]
+        DB[(Postgres DB\nusers, coffee_plants,\nlessons, tips, progress)]
+        Storage[(Storage\nImágenes, banners,\nassets educativos)]
+        EdgeFns[Edge Functions (futuro)\nrecomendaciones, scoring, analítica]
+    end
+
+    User[👤 Usuario] -->|Interacción táctil| UI
+
+    UI --> Logic
+    Logic --> SwiftData
+    Logic --> SupabaseClient
+
+    SupabaseClient --> Auth
+    SupabaseClient --> DB
+    SupabaseClient --> Storage
+    SupabaseClient --> EdgeFns
+
+    SwiftData -->|Modo offline / cache| UI
+    DB -->|Sincroniza progreso,\nplantas, lecciones| SwiftData
 
